@@ -2,7 +2,7 @@
 import logging
 
 
-class Coriander(object):
+class SdkManager(object):
 
     def __init__(self):
         # Configure Logging
@@ -13,5 +13,4 @@ class Coriander(object):
         self.logger.setLevel(logging.DEBUG)
         # self.logger.setLevel(logging.WARNING)
 
-        self.emulator_wrapper
-        self.adb_wrapper
+        self.SDK_path

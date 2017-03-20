@@ -1,8 +1,5 @@
 
 import logging
-from SdkManager import SdkManager
-from adb_wrapper import AdbWrapper
-import emulator_wrapper
 
 
 class Coriander(object):

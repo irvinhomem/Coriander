@@ -9,7 +9,8 @@ import threading
 import time
 from queue import Queue, Empty
 
-import sdktools.sdk_manager
+#import sdktools.sdk_manager
+from sdktools import sdk_manager, emulator_proc
 
 
 class EmulatorWrapper(object):
@@ -28,11 +29,16 @@ class EmulatorWrapper(object):
         self.emu_process = None
 
         self.set_emulator_location(sdkManager.get_android_sdk_path())
-        self.start_up_emulator(emu_name)
+        #self.start_up_emulator(emu_name)
 
-        #self.emu_process = mp.Process(target=self.start_up_emulator(emu_name))
+        #self.emu_process = mp.Process(target=self.start_up_emulator, args=emu_name)
         #self.emu_process.start()
         #self.emu_process.join()
+
+        emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name)
+        emulator_process.start()
+        # Give emulator process time to start up
+        time.sleep(15)
 
 
     def set_emulator_location(self, sdk_path):

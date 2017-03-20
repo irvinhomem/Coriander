@@ -47,6 +47,7 @@ class AdbWrapper(object):
         return self.adb_loc
 
     def start_adb_server(self):
+        self.logger.debug('******* STARTING ADB ************')
         cmd = [self.adb_loc, 'devices']
         #self.adb_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
@@ -54,6 +55,11 @@ class AdbWrapper(object):
         # newproc.start()
         # newproc.join()
         #self.logger.debug('Started new instance of emulator: %s' % emulator_name)
-        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout)
+        #self.logger.debug('ADB output: \n %s' % self.adb_process.stdout)
+
+        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+        for line in self.adb_process.stdout:
+            self.logger.debug('-->: %s' % line)
+
 
 

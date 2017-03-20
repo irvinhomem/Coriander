@@ -1,7 +1,10 @@
-
+"""
+DocString
+"""
 import logging
-from sdktools import sdk_manager
-import  sdktools.sdk_manager
+import sys
+from sdktools import sdk_manager, adb_wrapper
+#import  sdktools.sdk_manager
 
 
 class Coriander(object):
@@ -16,11 +19,13 @@ class Coriander(object):
         self.logger.setLevel(logging.DEBUG)
         # self.logger.setLevel(logging.WARNING)
 
-        self.emulator_wrapper
-        self.adb_wrapper
+        self.sdk_manager = sdk_manager.SdkManager()
+        self.emulator_wrapper =''
+        self.adb_wrapper = adb_wrapper.AdbWrapper(self.sdk_manager)
 
 
-    def main(self):
+def main():
         coriander = Coriander()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

@@ -55,7 +55,7 @@ class EmulatorWrapper(object):
         cmd = [self.emulator_loc, '-avd', emulator_name]
         #self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         #self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
-        self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                             bufsize=1, close_fds=self.ON_POSIX)
         q = Queue()
         t = Thread(target=self.enqueue_emu_output, args=(self.emu_process.stdout, q))

@@ -1,5 +1,7 @@
 
 import logging
+from sdktools import sdk_manager
+#import  sdktools.sdk_manager
 
 
 class Coriander(object):

@@ -3,7 +3,7 @@ DocString
 """
 import logging
 import sys
-from sdktools import sdk_manager, adb_wrapper
+from sdktools import sdk_manager, emulator_wrapper ,adb_wrapper
 #import  sdktools.sdk_manager
 
 
@@ -20,7 +20,7 @@ class Coriander(object):
         # self.logger.setLevel(logging.WARNING)
 
         self.sdk_manager = sdk_manager.SdkManager()
-        self.emulator_wrapper =''
+        self.emulator_wrapper = emulator_wrapper.EmulatorWrapper(self.sdk_manager)
         self.adb_wrapper = adb_wrapper.AdbWrapper(self.sdk_manager)
 
 

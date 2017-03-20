@@ -20,6 +20,7 @@ class SdkManager(object):
 
         self.set_android_sdk_path()
 
+
     def set_android_sdk_path(self):
         self.android_SDK_path = self.find_android_sdk_path()
         if self.android_SDK_path == '':
@@ -69,8 +70,6 @@ class SdkManager(object):
             sdk_path = ''
 
         return sdk_path
-
-
 
     def get_android_sdk_path(self):
         return self.android_SDK_path

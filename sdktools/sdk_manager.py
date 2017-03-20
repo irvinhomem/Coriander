@@ -3,6 +3,8 @@ import logging
 import os
 import platform
 import getpass
+#import sdktools.emulator_wrapper, sdktools.adb_wrapper
+from sdktools import  emulator_wrapper, adb_wrapper
 
 
 class SdkManager(object):
@@ -17,9 +19,12 @@ class SdkManager(object):
         # self.logger.setLevel(logging.WARNING)
 
         self.android_SDK_path = ''
+        self.emulator_instances = []
+        self.adb_instances = []
 
         self.set_android_sdk_path()
-
+        self.set_up_new_emulator('Nexus_5_API_22')
+        self.set_up_new_adb()
 
     def set_android_sdk_path(self):
         self.android_SDK_path = self.find_android_sdk_path()
@@ -73,3 +78,13 @@ class SdkManager(object):
 
     def get_android_sdk_path(self):
         return self.android_SDK_path
+
+    def set_up_new_emulator(self, emu_name):
+        # Create a new Emulator instance and add it to the SDK Manager's list of emulators
+        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name)
+        self.emulator_instances.append(my_Emulator)
+
+    def set_up_new_adb(self):
+        # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers
+        my_ADB = adb_wrapper.AdbWrapper(self)
+        self.adb_instances.append(my_ADB)

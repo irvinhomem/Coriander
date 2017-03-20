@@ -2,6 +2,8 @@
 import logging
 import os
 import platform
+import subprocess
+import multiprocessing as mp
 
 import sdktools.sdk_manager
 
@@ -18,8 +20,10 @@ class AdbWrapper(object):
         # self.logger.setLevel(logging.WARNING)
 
         self.adb_loc = ''
+        self.adb_process = None
 
         self.set_adb_location(sdkManager.get_android_sdk_path())
+        self.start_adb_server()
 
     def set_adb_location(self, sdk_path):
         platform_tools_path = 'platform-tools'
@@ -41,5 +45,15 @@ class AdbWrapper(object):
             self.logger.info('ADB Path: %s' % self.adb_loc)
 
         return self.adb_loc
+
+    def start_adb_server(self):
+        cmd = [self.adb_loc, 'devices']
+        #self.adb_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
+        self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
+        # newproc = mp.Process(target=self.adb_process)
+        # newproc.start()
+        # newproc.join()
+        #self.logger.debug('Started new instance of emulator: %s' % emulator_name)
+        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout)
 
 

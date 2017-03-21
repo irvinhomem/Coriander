@@ -87,11 +87,26 @@ class SdkManager(object):
     def get_android_sdk_path(self):
         return self.android_SDK_path
 
+    def get_adb_instance(self, index):
+        if len(self.adb_instances) > index:
+            return self.adb_instances[index]
+        else:
+            self.logger.error('ADB instance Index{} NOT found'.format(index))
+            exit()
+
     def set_up_new_emulator(self, emu_name, msq_queue):
         self.logger.debug('Queue Type: %s' % str(type(msq_queue)))
         # Create a new Emulator instance and add it to the SDK Manager's list of emulators
-        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue)
+        instance_id = len(self.emulator_instances)
+        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue, instance_id)
         self.emulator_instances.append(my_Emulator)
+
+    def get_emulator_instance(self, index):
+        if len(self.emulator_instances) > index:
+            return self.emulator_instances[index]
+        else:
+            self.logger.error('Emulator instance Index{} NOT found'.format(index))
+            exit()
 
     def set_up_new_adb(self):
         # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers
@@ -104,11 +119,12 @@ class SdkManager(object):
             line = self.shared_msg_queue.get()
             #if line is None:
             #    break
-            self.logger.debug("Queue line: %s" % line)
-            if emulator_ready in line:
+            self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
+            if emulator_ready in line['content']:
                 # Give the emulator time to start up completely
                 time.sleep(15)
-                self.logger.debug('EMULATOR IS READY!')
+                self.logger.info('EMULATOR IS READY!')
+
                 break
 
             #self.shared_msg_queue.

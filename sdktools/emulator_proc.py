@@ -8,7 +8,7 @@ import multiprocessing
 
 class EmulatorProc(threading.Thread):
 
-    def __init__(self, emu_loc, avd_name, msg_queue):
+    def __init__(self, emu_loc, avd_name, msg_queue, instance_id):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.WARNING)
@@ -21,6 +21,7 @@ class EmulatorProc(threading.Thread):
         self.avdName = avd_name
         self.emulator_loc = emu_loc
         self.msg_queue = msg_queue
+        self.instance_id = instance_id
 
     def run(self):
         emulator_name =self.avdName
@@ -36,4 +37,7 @@ class EmulatorProc(threading.Thread):
         for line in self.emu_process.stdout:
             self.logger.debug('-->: %s' % line)
             #self.msg_queue.put(line)
-            self.msg_queue.put_nowait(line)
+            msg = dict()
+            msg['instance_id'] = self.instance_id
+            msg['content'] = line
+            self.msg_queue.put_nowait(msg)

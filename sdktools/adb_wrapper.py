@@ -5,7 +5,8 @@ import platform
 import subprocess
 import multiprocessing as mp
 
-import sdktools.sdk_manager
+#import sdktools.sdk_manager
+from sdktools import sdk_manager, adb_proc
 
 
 class AdbWrapper(object):
@@ -23,7 +24,9 @@ class AdbWrapper(object):
         self.adb_process = None
 
         self.set_adb_location(sdkManager.get_android_sdk_path())
-        self.start_adb_server()
+        #self.start_adb_server()
+        self.adb_process = adb_proc.AdbProc(self.adb_loc, ['devices'])
+        self.adb_process.start()
 
     def set_adb_location(self, sdk_path):
         platform_tools_path = 'platform-tools'
@@ -60,6 +63,9 @@ class AdbWrapper(object):
         self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s' % line)
+
+    def run_adb_command(self):
+        return
 
 
 

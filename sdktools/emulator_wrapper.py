@@ -15,7 +15,7 @@ from sdktools import sdk_manager, emulator_proc
 
 class EmulatorWrapper(object):
 
-    def __init__(self, sdkManager, emu_name):
+    def __init__(self, sdkManager, emu_name, msq_queue):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.WARNING)
@@ -27,6 +27,7 @@ class EmulatorWrapper(object):
         self.ON_POSIX = 'posix' in sys.builtin_module_names
         self.emulator_loc = ''
         self.emu_process = None
+        self.shared_queue = msq_queue
 
         self.set_emulator_location(sdkManager.get_android_sdk_path())
         #self.start_up_emulator(emu_name)
@@ -35,11 +36,12 @@ class EmulatorWrapper(object):
         #self.emu_process.start()
         #self.emu_process.join()
 
-        emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name)
+        emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name, self.shared_queue)
         emulator_process.start()
-        # Give emulator process time to start up
-        time.sleep(15)
+        #emulator_process.join()
 
+        # Give emulator process time to start up
+        #time.sleep(20)
 
     def set_emulator_location(self, sdk_path):
         tools_path = 'tools'

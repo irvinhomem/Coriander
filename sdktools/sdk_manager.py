@@ -5,7 +5,8 @@ import platform
 import getpass
 #import sdktools.emulator_wrapper, sdktools.adb_wrapper
 from sdktools import  emulator_wrapper, adb_wrapper
-
+from multiprocessing import Queue
+import time
 
 class SdkManager(object):
 
@@ -21,9 +22,16 @@ class SdkManager(object):
         self.android_SDK_path = ''
         self.emulator_instances = []
         self.adb_instances = []
+        self.shared_msg_queue = Queue()
 
         self.set_android_sdk_path()
-        self.set_up_new_emulator('Nexus_5_API_22')
+        self.set_up_new_emulator('Nexus_5_API_22', self.shared_msg_queue)
+        #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
+        self.check_msg_queue()
+        #self.logger.debug()
+        #self.shared_msg_queue.join_thread()
+        #self.logger.debug("Queue Length: %i" % self.shared_msg_queue.)
+
         self.set_up_new_adb()
 
     def set_android_sdk_path(self):
@@ -79,12 +87,28 @@ class SdkManager(object):
     def get_android_sdk_path(self):
         return self.android_SDK_path
 
-    def set_up_new_emulator(self, emu_name):
+    def set_up_new_emulator(self, emu_name, msq_queue):
+        self.logger.debug('Queue Type: %s' % str(type(msq_queue)))
         # Create a new Emulator instance and add it to the SDK Manager's list of emulators
-        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name)
+        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue)
         self.emulator_instances.append(my_Emulator)
 
     def set_up_new_adb(self):
         # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers
         my_ADB = adb_wrapper.AdbWrapper(self)
         self.adb_instances.append(my_ADB)
+
+    def check_msg_queue(self):
+        emulator_ready = "Serial number of this emulator"
+        while True:
+            line = self.shared_msg_queue.get()
+            #if line is None:
+            #    break
+            self.logger.debug("Queue line: %s" % line)
+            if emulator_ready in line:
+                # Give the emulator time to start up completely
+                time.sleep(15)
+                self.logger.debug('EMULATOR IS READY!')
+                break
+
+            #self.shared_msg_queue.

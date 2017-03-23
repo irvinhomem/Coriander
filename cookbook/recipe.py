@@ -25,13 +25,14 @@ class Recipe(object):
 
         emu = self.sdk_manager.get_emulator_instance(0)
         adb = self.sdk_manager.get_adb_instance(0)
-        apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
-        apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
+        apk_data_list = self.apk_store.get_all_apk_file_data_from_source('malicious')
+        #apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
+        #apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
 
         for apk_item in apk_data_list:
             self.logger.debug("APK item: {}".format(apk_item))
 
-        for apk_item in apk_name_list:
-            self.logger.debug("APK item names: {}".format(apk_item))
+        #for apk_item in apk_name_list:
+        #    self.logger.debug("APK item names: {}".format(apk_item))
 
         #self.apk_store.get_an_apk('')

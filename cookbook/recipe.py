@@ -21,7 +21,13 @@ class Recipe(object):
         self.instructions = instructions
 
     def run_recipe(self):
-        self.logger.debug(self.instructions)
+        self.logger.debug("RUNNING RECIPE: {} ". format(self.instructions))
 
         emu = self.sdk_manager.get_emulator_instance(0)
         adb = self.sdk_manager.get_adb_instance(0)
+        apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
+
+        for apk_item in apk_data_list:
+            self.logger.debug("APK item: {}".format(apk_item))
+
+        #self.apk_store.get_an_apk('')

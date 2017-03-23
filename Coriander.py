@@ -30,6 +30,7 @@ class Coriander(object):
         #                                self.apk_store)
         instructions = 'test'
         self.my_recipe = recipe.Recipe(self.sdk_manager, self.apk_store, instructions)
+        self.my_recipe.run_recipe()
         # self.emulator_wrapper = emulator_wrapper.EmulatorWrapper(self.sdk_manager)
         # self.adb_wrapper = adb_wrapper.AdbWrapper(self.sdk_manager)
 

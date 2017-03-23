@@ -79,18 +79,17 @@ class ApkStore(object):
             self.logger.debug("vt_detection INDEX: {}".format(vt_detection_idx))
             for row in islice(reader, 10):
                 if mal_state == 'malicious':
-                    if row[vt_detection_idx] > 0:
+                    if int(row[vt_detection_idx]) > 0:
                         apk_filenames.append(row[0])
                         self.logger.debug('APK SHA256 (name): {}'.format(row[0]))
                         # print("SHA256: {}".format(row[0]))
                         # print(row)
                 elif mal_state == 'benign':
-                    if row[vt_detection_idx] == 0:
+                    if int(row[vt_detection_idx]) == 0:
                         apk_filenames.append(row[0])
                         self.logger.debug('APK SHA256 (name): {}'.format(row[0]))
                         # print("SHA256: {}".format(row[0]))
                         # print(row)
-
 
         return  apk_filenames
 

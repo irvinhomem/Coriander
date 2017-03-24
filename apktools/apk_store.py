@@ -10,6 +10,7 @@ import codecs
 import hashlib
 from tqdm import tqdm
 
+from apktools import apk_file
 
 class ApkStore(object):
 
@@ -50,7 +51,8 @@ class ApkStore(object):
             return data
 
     def get_an_apk(self, file_name):
-        apk_file = None
+        apk = None
+        #apk_file_path = ''
 
         if self.apk_store_path_type == 'local':
             #Pick file from local path
@@ -74,11 +76,17 @@ class ApkStore(object):
                     for block in tqdm(resp.iter_content(1024), unit='B', total=total_size/1024, unit_scale=True):
                         file_handle.write(block)
                         #currsize = (file_handle/1000000)
+                    #apk_file = file_handle
+                    #apk_file_path = temp_filepath
+                    apk = apk_file.ApkFile(temp_filepath)
 
                 self.logger.debug('Local SHA 256: {}'.format(self.get_sha256_hash(temp_filepath)))
             else:
                 self.logger.error("Something went wrong with the file download: {} - {}".format(resp.status_code, resp.reason))
-        return apk_file
+
+        #return apk_file
+        #return apk_file_path
+        return apk
 
     def get_sha256_hash(self, filepath, block_size=65536):
         sha256 = hashlib.sha256()

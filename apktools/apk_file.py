@@ -1,9 +1,12 @@
 
 import logging
 import os
-import axmlparserpy.axmlprinter as axmprinter
-import xml.dom.minidom as minidom
+import axmlparserpy.axmlprinter as axmlprinter
+import  axmlparserpy.apk
+#import xml.dom.minidom as minidom
 from xml.etree import ElementTree as ET
+import zipfile
+
 
 
 class ApkFile(object):
@@ -34,8 +37,19 @@ class ApkFile(object):
         return self.apk_file_path
 
     def parse_android_manifest(self):
-        manifest_path = os.path.join(self.apk_file_path, 'AndroidManifest.xml')
-        ap = axmprinter.AXMLPrinter(open(manifest_path, 'rb').read())
+        self.logger.debug('Temp APK location: {}'.format(self.apk_file_path))
+        # Reading a file inside a normal directory
+        #manifest_path = os.path.join(self.apk_file_path, 'AndroidManifest.xml')
+        #ap = axmlprinter.AXMLPrinter(open(manifest_path, 'rb').read())
+
+        #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
+        #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
+        apk_archive = zipfile.ZipFile(self.apk_file_path)
+        manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
+        #manifest_file = apk_archive.read('AndroidManifest.xml')
+        #apk_file = zipfile.ZipFile.open(self.apk_file_path, 'rb').read()
+        ap = axmlprinter.AXMLPrinter(manifest_file)
+
         #buff = minidom.parseString(ap.getBuff()).toxml()
         ## "buff" contains the parsed AXML in Minidom format and can be printed to screen
 

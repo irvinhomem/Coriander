@@ -44,16 +44,9 @@ class ApkFile(object):
 
         #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
         #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
-        #self.logger.debug("Current Working Dir: {}".format(os.getcwd()))
-        #apk_abs_path = os.path.abspath(os.path.join(os.path.join(os.pardir, os.path.dirname(__file__)), self.apk_rel_file_path))
-        #apk_abs_path = os.path.abspath(os.path.join(os.getcwd(), self.apk_rel_file_path))
-        #self.logger.debug('Abs path: {}'.format(apk_abs_path))
-        #apk_archive = zipfile.ZipFile(apk_abs_path)
         apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
         self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
         manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
-        #manifest_file = apk_archive.read('AndroidManifest.xml')
-        #apk_file = zipfile.ZipFile.open(self.apk_file_path, 'rb').read()
         ap = axmlprinter.AXMLPrinter(manifest_file)
 
         #buff = minidom.parseString(ap.getBuff()).toxml()

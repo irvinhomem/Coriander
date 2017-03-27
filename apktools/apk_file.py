@@ -20,7 +20,7 @@ class ApkFile(object):
         self.logger.setLevel(logging.DEBUG)
         # self.logger.setLevel(logging.WARNING)
 
-        self.apk_file_path = apk_path
+        self.apk_rel_file_path = apk_path
         self.package_name = ''
         self.activity_list = []
         self.app_permissions_list = []
@@ -34,17 +34,23 @@ class ApkFile(object):
         self.parse_android_manifest()
 
     def get_file_path(self):
-        return self.apk_file_path
+        return self.apk_rel_file_path
 
     def parse_android_manifest(self):
-        self.logger.debug('Temp APK location: {}'.format(self.apk_file_path))
+        self.logger.debug('Temp APK location: {}'.format(self.apk_rel_file_path))
         # Reading a file inside a normal directory
         #manifest_path = os.path.join(self.apk_file_path, 'AndroidManifest.xml')
         #ap = axmlprinter.AXMLPrinter(open(manifest_path, 'rb').read())
 
         #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
         #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
-        apk_archive = zipfile.ZipFile(self.apk_file_path)
+        #self.logger.debug("Current Working Dir: {}".format(os.getcwd()))
+        #apk_abs_path = os.path.abspath(os.path.join(os.path.join(os.pardir, os.path.dirname(__file__)), self.apk_rel_file_path))
+        #apk_abs_path = os.path.abspath(os.path.join(os.getcwd(), self.apk_rel_file_path))
+        #self.logger.debug('Abs path: {}'.format(apk_abs_path))
+        #apk_archive = zipfile.ZipFile(apk_abs_path)
+        apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
+        self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
         manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
         #manifest_file = apk_archive.read('AndroidManifest.xml')
         #apk_file = zipfile.ZipFile.open(self.apk_file_path, 'rb').read()

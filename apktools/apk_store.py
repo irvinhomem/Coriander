@@ -78,8 +78,9 @@ class ApkStore(object):
                         #currsize = (file_handle/1000000)
                     #apk_file = file_handle
                     #apk_file_path = temp_filepath
-                    apk = apk_file.ApkFile(temp_filepath)
 
+                # Check the hash if the transfer has completed successfully
+                apk = apk_file.ApkFile(temp_filepath)
                 self.logger.debug('Local SHA 256: {}'.format(self.get_sha256_hash(temp_filepath)))
             else:
                 self.logger.error("Something went wrong with the file download: {} - {}".format(resp.status_code, resp.reason))

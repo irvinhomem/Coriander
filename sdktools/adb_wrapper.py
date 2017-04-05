@@ -76,5 +76,28 @@ class AdbWrapper(object):
 
         return
 
+    def install_apk(self, apk_file):
+        cmd =[self.adb_loc, 'install', apk_file.get_file_path()]
+        self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                            universal_newlines=True, shell=True)
+
+        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+        for line in self.adb_process.stdout:
+            self.logger.debug('-->: %s ' % line)
+
+        return
+
+    def uninstall_apk(self, apk_file):
+        cmd =[self.adb_loc, 'uninstall', apk_file.get_package_name()]
+        self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                            universal_newlines=True, shell=True)
+
+        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+        for line in self.adb_process.stdout:
+            self.logger.debug('-->: %s ' % line)
+
+        return
+
+
 
 

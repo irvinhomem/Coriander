@@ -39,10 +39,11 @@ class Recipe(object):
 
         filename_list = self.apk_store.get_single_column_as_list('sha256')
         self.logger.debug('Filename List length: {}'.format(len(filename_list)))
+
         # Get 3rd filename (just for testing)
         self.logger.debug('3rd Filename: {}'.format(filename_list[2]))
         an_apk_file = self.apk_store.get_an_apk(filename_list[2])
 
         self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
         # Install the APK
-        #adb
+        adb.run_adb_command('install', [an_apk_file.get_file_path()])

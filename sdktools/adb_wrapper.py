@@ -64,7 +64,15 @@ class AdbWrapper(object):
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s' % line)
 
-    def run_adb_command(self):
+    def run_adb_command(self, adb_command, params):
+        cmd = [self.adb_loc, adb_command, params]
+        self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                            universal_newlines=True, shell=True)
+
+        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+        for line in self.adb_process.stdout:
+            self.logger.debug('-->: %s' % line)
+
         return
 
 

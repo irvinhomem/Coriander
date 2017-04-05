@@ -47,3 +47,6 @@ class Recipe(object):
         self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
         # Install the APK
         adb.run_adb_command('install', [an_apk_file.get_file_path()])
+
+        # Uninstall the APK
+        adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])

@@ -81,3 +81,6 @@ class ApkFile(object):
             self.logger.debug("USER DEFINED PERMISSION Name: %s" % perm_name)
             self.app_permissions_list.append(perm_name)
 
+    def get_package_name(self):
+        return self.main_package_name
+

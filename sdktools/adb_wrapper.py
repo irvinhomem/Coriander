@@ -7,6 +7,7 @@ import multiprocessing as mp
 
 #import sdktools.sdk_manager
 from sdktools import sdk_manager, adb_proc
+from tqdm import tqdm
 
 
 class AdbWrapper(object):
@@ -71,7 +72,7 @@ class AdbWrapper(object):
 
         self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
         for line in self.adb_process.stdout:
-            self.logger.debug('-->: %s' % line)
+            self.logger.debug('-->: %s ' % line)
 
         return
 

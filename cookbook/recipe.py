@@ -1,6 +1,6 @@
 
 import logging
-
+import time
 
 class Recipe(object):
 
@@ -41,21 +41,33 @@ class Recipe(object):
         self.logger.debug('Filename List length: {}'.format(len(filename_list)))
 
         # Get 3rd filename (just for testing)
-        self.logger.debug('3rd Filename: {}'.format(filename_list[2]))
-        an_apk_file = self.apk_store.get_an_apk(filename_list[2])
+        self.logger.debug('3rd Filename: {}'.format(filename_list[4])) #[2]
+        an_apk_file = self.apk_store.get_an_apk(filename_list[4])
 
         self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
         #********************
         # Install the APK
         # Method 1
         adb.run_adb_command('install', [an_apk_file.get_file_path()])
-        # # Method 2
-        # adb.install_apk(an_apk_file)
+        ### Method 2
+        ##adb.install_apk(an_apk_file)
 
+        time.sleep(10)
         # *******************
         # Go to FIRST activity and dump memory //// OR //// Go through each activity and dump memory ?
         # *******************
         # Run first activity
+        # adb shell am start -n com.package.name/com.package.name.xyz.ActivityName
+        pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_activity_list()[1]
+        self.logger.debug('Package and Activity name to run: {}'.format(pkg_and_activity_name))
+        #adb.run_adb_command(['shell', 'am', 'start', '-n', pkg_and_activity_name])
+        full_cmd = ['shell', 'am', 'start', '-n', pkg_and_activity_name]
+        #full_cmd = ['shell', 'ls']
+        #full_cmd = ['devices']
+        #full_cmd = 'shell am start' # -n ' #+ pkg_and_activity_name
+        adb.run_adb_command('-e', full_cmd)
+        #adb.run_adb_get_output(full_cmd)
+
 
         # Dump process memory
 
@@ -64,6 +76,6 @@ class Recipe(object):
         # *******************
         # Uninstall the APK
         # Method 1
-        adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
-        # # Method 2
-        # adb.uninstall_apk(an_apk_file)
+        #adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
+        ### Method 2
+        ##adb.uninstall_apk(an_apk_file)

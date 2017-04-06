@@ -59,23 +59,23 @@ class ApkFile(object):
         self.main_package_name = xml_doc.get('package')
         self.version_code = xml_doc.get('{http://schemas.android.com/apk/res/android}versionCode')
 
-        self.get_activity_list(xml_doc)
-        self.get_permissions_list(xml_doc)
+        self.load_activity_list(xml_doc)
+        self.load_permissions_list(xml_doc)
 
-    def get_activity_list(self, xmldoc):
+    def load_activity_list(self, xmldoc):
         #for activity in xmldoc.findall('application/activity'):
         for activity in xmldoc.findall('.//activity'):
             activity_name = activity.get('{http://schemas.android.com/apk/res/android}name')
             self.logger.debug("APP ACTIVITY Name: %s" % activity_name)
             self.activity_list.append(activity_name)
 
-    def get_permissions_list(self, xmldoc):
+    def load_permissions_list(self, xmldoc):
         for perm in xmldoc.findall('.//uses-permission'):
             perm_name = perm.get('{http://schemas.android.com/apk/res/android}name')
             self.logger.debug("APP PERMISSION Name: %s" % perm_name)
             self.app_permissions_list.append(perm_name)
 
-    def get_user_def_perms_list(self, xmldoc):
+    def load_user_def_perms_list(self, xmldoc):
         for perm in xmldoc.findall('.//permission'):
             perm_name = perm.get('{http://schemas.android.com/apk/res/android}name')
             self.logger.debug("USER DEFINED PERMISSION Name: %s" % perm_name)
@@ -83,4 +83,7 @@ class ApkFile(object):
 
     def get_package_name(self):
         return self.main_package_name
+
+    def get_activity_list(self):
+        return self.activity_list
 

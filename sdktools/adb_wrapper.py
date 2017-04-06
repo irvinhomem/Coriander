@@ -65,16 +65,32 @@ class AdbWrapper(object):
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s' % line)
 
-    def run_adb_command(self, adb_command, params):
-        cmd = [self.adb_loc, adb_command, params]
+    def run_adb_command(self, adb_command, params=''):
+        cmd = [self.adb_loc, adb_command]
+        for item in params:
+            cmd.append(item)
+        self.logger.debug("cmd: {}".format(cmd))
         self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                            universal_newlines=True, shell=True)
+                                             universal_newlines=True, shell=True) # stdin= subprocess.PIPE,
+        #self.adb_process.communicate(' '.join(cmd))
+
+        self.logger.debug('Args: {}'.format(self.adb_process.args))
 
         self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s ' % line)
 
+        if len(self.adb_process.stderr.read()) > 0:
+            for line in self.adb_process.stderr:
+                self.logger.debug('Err:-->: %s ' % line)
+        #self.adb_process.communicate('\n')
+
         return
+
+    # def run_adb_get_output(self, adb_command, params=''):
+    #     cmd = [self.adb_loc, adb_command, params]
+    #     self.adb_process = subprocess.check_output(cmd, stderr=subprocess.PIPE,
+    #                                         universal_newlines=True, shell=True)
 
     def install_apk(self, apk_file):
         cmd =[self.adb_loc, 'install', apk_file.get_file_path()]

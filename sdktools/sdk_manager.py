@@ -122,7 +122,8 @@ class SdkManager(object):
             self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
             if emulator_ready in line['content']:
                 # Give the emulator time to start up completely
-                time.sleep(15)
+                self.logger.info('Waiting for EMULATOR (time delay) !')
+                time.sleep(20) # 15s # 20s
                 self.logger.info('EMULATOR IS READY!')
 
                 break

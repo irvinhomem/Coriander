@@ -28,6 +28,7 @@ class EmulatorConsole(object):
         auth_code_cmd = 'auth ' + auth_token
         self.telnet_conn.write(auth_code_cmd.encode('ascii') + b"\n")
         #self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_all()))
+        self.logger.debug('**************** TELNET OUTPUT *******************')
         self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))
 
     def read_auth_token(self, file_path):

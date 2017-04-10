@@ -41,6 +41,8 @@ class EmulatorWrapper(object):
         emulator_process.start()
         #emulator_process.join()
 
+        self.emulator_console = ''
+
         # Give emulator process time to start up
         #time.sleep(20)
 
@@ -66,7 +68,13 @@ class EmulatorWrapper(object):
         return self.emulator_loc
 
     def start_up_emulator(self, emulator_name):
-        cmd = [self.emulator_loc, '-avd', emulator_name]
+        #[This is not explicitly used at the moment]
+        # Original simple command to start up emulator
+        #cmd = [self.emulator_loc, '-avd', emulator_name]
+        # With debugging options since Google has changed the normal output of the "AVD Serial" and "console port"
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
+        cmd = [self.emulator_loc, '-avd', emulator_name, '-debug-init']
+        self.logger.debug('Emulator Command: {}'.format(cmd))
         #self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         #self.emu_proc_thread = mp.Process(target=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False))

@@ -114,13 +114,23 @@ class SdkManager(object):
         self.adb_instances.append(my_ADB)
 
     def check_msg_queue(self):
-        emulator_ready = "Serial number of this emulator"
+        #emulator_ready = "Serial number of this emulator"
+        #emulator_ready = "Adb connected, start proxing data"
+        emulator_ready_criteria = ["Serial number of this emulator",
+                          "emulator: Listening for console connections on port:",
+                          "emulator: Serial number of this emulator (for ADB):",
+                          "emulator: control console listening on port",
+                          "Adb connected, start proxing data"]
         while True:
             line = self.shared_msg_queue.get()
             #if line is None:
             #    break
             self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
-            if emulator_ready in line['content']:
+            #if emulator_ready in line['content']:
+            #if any(item in emulator_ready for item in line['content']):
+            criterion = line['content']
+            # Check for "Emulator is Ready" criteria
+            if any(item in criterion for item in emulator_ready_criteria):
                 # Give the emulator time to start up completely
                 self.logger.info('Waiting for EMULATOR (time delay) !')
                 time.sleep(20) # 15s # 20s

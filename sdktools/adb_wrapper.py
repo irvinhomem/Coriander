@@ -87,11 +87,6 @@ class AdbWrapper(object):
 
         return
 
-    # def run_adb_get_output(self, adb_command, params=''):
-    #     cmd = [self.adb_loc, adb_command, params]
-    #     self.adb_process = subprocess.check_output(cmd, stderr=subprocess.PIPE,
-    #                                         universal_newlines=True, shell=True)
-
     def install_apk(self, apk_file):
         cmd =[self.adb_loc, 'install', apk_file.get_file_path()]
         self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,

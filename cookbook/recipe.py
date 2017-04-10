@@ -62,16 +62,21 @@ class Recipe(object):
         self.logger.debug('Package and Activity name to run: {}'.format(pkg_and_activity_name))
         #adb.run_adb_command(['shell', 'am', 'start', '-n', pkg_and_activity_name])
         full_cmd = ['shell', 'am', 'start', '-n', pkg_and_activity_name]
+        #full_cmd = ['am', 'start', '-n', pkg_and_activity_name]
         #full_cmd = ['shell', 'ls']
         #full_cmd = ['devices']
         #full_cmd = 'shell am start' # -n ' #+ pkg_and_activity_name
         adb.run_adb_command('-e', full_cmd)
-        #adb.run_adb_get_output(full_cmd)
-
+        #adb.run_adb_command('shell', full_cmd)
 
         # Dump process memory
 
+
+
         # Close app
+        time.sleep(5) # Delay before closing
+        force_stop_cmd = ['shell', 'am', 'force-stop', an_apk_file.get_package_name()]
+        adb.run_adb_command('-e', force_stop_cmd)
 
         # *******************
         # Uninstall the APK
@@ -79,3 +84,9 @@ class Recipe(object):
         #adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
         ### Method 2
         ##adb.uninstall_apk(an_apk_file)
+
+        # ******************
+        # Reset Emulator / AVD instance back to original snapshot, or wipe-data
+        # Couldn't get snapshotting working, so "wipe-data" is the next best option for now.
+        # Shutdown emulator first, then wipe-data
+        # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans

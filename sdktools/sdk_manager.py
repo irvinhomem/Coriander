@@ -4,7 +4,7 @@ import os
 import platform
 import getpass
 #import sdktools.emulator_wrapper, sdktools.adb_wrapper
-from sdktools import  emulator_wrapper, adb_wrapper
+from sdktools import  emulator_wrapper, adb_wrapper, emulator_console
 from multiprocessing import Queue
 import time
 
@@ -21,6 +21,7 @@ class SdkManager(object):
 
         self.android_SDK_path = ''
         self.emulator_instances = []
+        self.emulator_console_instances = []
         self.adb_instances = []
         self.shared_msg_queue = Queue()
 
@@ -31,6 +32,9 @@ class SdkManager(object):
         #self.logger.debug()
         #self.shared_msg_queue.join_thread()
         #self.logger.debug("Queue Length: %i" % self.shared_msg_queue.)
+
+        #Set up emulator console (Need to pick up hostname and port from MSG_QUEUE)
+        self.set_up_new_emulator_console('localhost', 5554)
 
         self.set_up_new_adb()
 
@@ -107,6 +111,11 @@ class SdkManager(object):
         else:
             self.logger.error('Emulator instance Index{} NOT found'.format(index))
             exit()
+
+    def set_up_new_emulator_console(self, hostname, port_num):
+        # Create a new Emulator Console instance and append it to the SDK Manager's list of Emulator_Consoles
+         emu_console = emulator_console.EmulatorConsole(hostname, port_num)
+         self.emulator_console_instances.append(emu_console)
 
     def set_up_new_adb(self):
         # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers

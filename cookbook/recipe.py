@@ -2,6 +2,8 @@
 import logging
 import time
 
+#from sdktools import sdk_manager
+
 class Recipe(object):
 
     #def __init__(self, emulator, adb, apk_store):

@@ -8,9 +8,10 @@ import subprocess
 import threading
 import time
 from queue import Queue, Empty
+from telnetlib import Telnet
 
 #import sdktools.sdk_manager
-from sdktools import sdk_manager, emulator_proc
+from sdktools import sdk_manager, emulator_proc, emulator_console
 
 
 class EmulatorWrapper(object):
@@ -41,7 +42,8 @@ class EmulatorWrapper(object):
         emulator_process.start()
         #emulator_process.join()
 
-        self.emulator_console = ''
+        #self.emulator_console = emulator_console.EmulatorConsole('localhost', 5554)
+        #self.emulator_console = None
 
         # Give emulator process time to start up
         #time.sleep(20)
@@ -89,6 +91,9 @@ class EmulatorWrapper(object):
         # self.emu_process.wait()
 
         #time.sleep(15)
+
+    # def set_up_emulator_console(self, hostname, port_num):
+    #     self.emulator_console = emulator_console.EmulatorConsole(hostname, port_num)
 
 
 

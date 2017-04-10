@@ -97,6 +97,9 @@ class Recipe(object):
         # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans
 
         # ******************
-        # Kill emulator instance
+        # Kill emulator instance (Using the emulator telnet console "kill" command
+        # or, telnet console "vm stop" command; or, telnet console "avd stop" command)
         time.sleep(5)  # Delay before Killing Emulator Instance
         emu_console.run_tty_command('kill')
+        #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
+        #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)

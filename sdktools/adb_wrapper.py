@@ -69,7 +69,9 @@ class AdbWrapper(object):
         cmd = [self.adb_loc, adb_command]
         for item in params:
             cmd.append(item)
-        self.logger.debug("cmd: {}".format(cmd))
+        self.logger.debug('===========')
+        self.logger.debug("ADB Command Run: {}".format(cmd))
+        self.logger.debug('===========')
         self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                              universal_newlines=True, shell=True) # stdin= subprocess.PIPE,
         #self.adb_process.communicate(' '.join(cmd))

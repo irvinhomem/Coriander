@@ -29,6 +29,7 @@ class Recipe(object):
 
         emu = self.sdk_manager.get_emulator_instance(0)
         adb = self.sdk_manager.get_adb_instance(0)
+        emu_console = self.sdk_manager.get_emulator_console_instance(0)
         #apk_data_list = self.apk_store.get_all_apk_file_data_from_source('malicious')
         apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
         #apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
@@ -72,6 +73,7 @@ class Recipe(object):
         #adb.run_adb_command('shell', full_cmd)
 
         # Dump process memory
+        time.sleep(10)  # Delay before Starting Memory Dump
 
 
 
@@ -82,8 +84,9 @@ class Recipe(object):
 
         # *******************
         # Uninstall the APK
+        time.sleep(5)  # Delay before Uninstalling
         # Method 1
-        #adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
+        adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
         ### Method 2
         ##adb.uninstall_apk(an_apk_file)
 
@@ -92,3 +95,8 @@ class Recipe(object):
         # Couldn't get snapshotting working, so "wipe-data" is the next best option for now.
         # Shutdown emulator first, then wipe-data
         # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans
+
+        # ******************
+        # Kill emulator instance
+        time.sleep(5)  # Delay before Killing Emulator Instance
+        emu_console.run_tty_command('kill')

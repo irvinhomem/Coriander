@@ -28,7 +28,7 @@ class EmulatorConsole(object):
         auth_code_cmd = 'auth ' + auth_token
         self.telnet_conn.write(auth_code_cmd.encode('ascii') + b"\n")
         #self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_all()))
-        self.logger.debug('**************** TELNET OUTPUT *******************')
+        self.logger.debug('++++++++++++++++ TELNET OUTPUT ++++++++++++++++')
         self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))
 
     def read_auth_token(self, file_path):
@@ -40,3 +40,10 @@ class EmulatorConsole(object):
 
             # return str(data['config'][apk_path_type]['apk_path'])
             return data
+
+    def run_tty_command(self, cmd):
+        self.logger.debug('++++++++++++++++++++')
+        self.logger.debug("TELNET COMMAND: {}".format(cmd))
+        self.logger.debug('++++++++++++++++++++')
+        self.telnet_conn.write(cmd.encode('ascii') + b'\n')
+        self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))

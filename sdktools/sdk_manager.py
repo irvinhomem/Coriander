@@ -117,6 +117,13 @@ class SdkManager(object):
          emu_console = emulator_console.EmulatorConsole(hostname, port_num)
          self.emulator_console_instances.append(emu_console)
 
+    def get_emulator_console_instance(self, index):
+        if len(self.emulator_console_instances) > index:
+            return self.emulator_console_instances[index]
+        else:
+            self.logger.error('Emulator Console instance Index{} NOT found'.format(index))
+            exit()
+
     def set_up_new_adb(self):
         # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers
         my_ADB = adb_wrapper.AdbWrapper(self)

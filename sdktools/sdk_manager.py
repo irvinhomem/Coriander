@@ -26,7 +26,7 @@ class SdkManager(object):
         self.shared_msg_queue = Queue()
 
         self.set_android_sdk_path()
-        self.set_up_new_emulator('Nexus_5_API_22', self.shared_msg_queue)
+        self.set_up_new_emulator('Nexus_5_API_22_2', self.shared_msg_queue)
         #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
         self.check_msg_queue()
         #self.logger.debug()

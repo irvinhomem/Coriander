@@ -75,7 +75,8 @@ class EmulatorWrapper(object):
         #cmd = [self.emulator_loc, '-avd', emulator_name]
         # With debugging options since Google has changed the normal output of the "AVD Serial" and "console port"
         #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
-        cmd = [self.emulator_loc, '-avd', emulator_name, '-debug-init']
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug-init']
+        cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data','-debug-init']
         self.logger.debug('Emulator Command: {}'.format(cmd))
         #self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)

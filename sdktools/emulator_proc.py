@@ -28,7 +28,9 @@ class EmulatorProc(threading.Thread):
         # Original simple command to start up emulator
         #cmd = [self.emulator_loc, '-avd', emulator_name]
         # With debugging options since Google has changed the normal output of the "AVD Serial" and "console port"
-        cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
+        # With directive to ensure the AVD is wiped before starting it
+        cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data', '-debug', 'init']
         # self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                             universal_newlines=True, shell=True)

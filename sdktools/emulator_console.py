@@ -3,7 +3,12 @@ from telnetlib import Telnet
 import os
 
 class EmulatorConsole(object):
-
+    '''
+    Telnet connection through emulator console is needed so as to kill the emulator at the end of the process,
+    but also in preparation for "snapshotting" when the Google eventually fixes the snapshotting capabilties. They seem
+    to have been there, but are currently disabled or not working at the momment (the directives are still there in 
+    the -help command).
+    '''
     def __init__(self, hostname, port_num):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)

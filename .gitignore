@@ -145,3 +145,4 @@ ENV/
 .idea/modules.xml
 /config/APK_PATH.json
 /temp/
+/system-img-qcow2/

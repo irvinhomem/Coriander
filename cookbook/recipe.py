@@ -34,6 +34,18 @@ class Recipe(object):
         apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
         #apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
 
+        # Configure AndroMemdump for first run
+        # (Given the system.img.qcow2 file preconfigured with Andromemdump-beta installed in System partition)
+        andromemdump_pkg_name = 'com.zwerks.andromemdumpbeta'
+        andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
+        andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
+        andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
+        adb.run_adb_command('-e', andromemdump_cmd)
+        time.sleep(5)
+
+        # Andromemdump can be closed, or killed here,
+        # because the configuration is done while running the MainActivity [onCreate()]
+
         for apk_item in apk_data_list:
             self.logger.debug("APK item: {}".format(apk_item))
 
@@ -74,7 +86,7 @@ class Recipe(object):
 
         # Dump process memory
         time.sleep(10)  # Delay before Starting Memory Dump
-
+        adb.check_memdump_is_in_place()
 
 
         # Close app

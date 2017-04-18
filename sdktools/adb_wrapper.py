@@ -165,7 +165,9 @@ class AdbWrapper(object):
             memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip() + '/'
             andromemdump_dir_list = self.run_adb_command_return_list(['shell', 'ls', '-al', memdump_loc])
         #cmd = [self.adb_loc, ls_memdump_cmd]
-            if 'memdump' in andromemdump_dir_list:
+            memdump_criteria = 'memdump'
+            memdump_present = [item for item in andromemdump_dir_list if memdump_criteria in item]
+            if len(memdump_present) > 0:
                 self.logger.debug('*****')
                 self.logger.debug('MEMDUMP CORRECTLY INSTALLED IN: {}'.format(memdump_loc) )
                 self.logger.debug('*****')

@@ -65,7 +65,13 @@ class AdbWrapper(object):
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s' % line)
 
-    def run_adb_command(self, adb_command, params=''):
+    def run_adb_command(self, adb_command, params):
+        """
+        @type params: list
+        :param adb_command: 
+        :param params: 
+        :return: 
+        """
         cmd = [self.adb_loc, adb_command]
         for item in params:
             cmd.append(item)
@@ -213,6 +219,37 @@ class AdbWrapper(object):
 
         self.logger.debug('Proc ID: {}'.format(proc_id))
         return proc_id
+
+    def dump_process_memory(self, package_name, dump_dest_type):
+        # May be move some of this to MemDumper package?
+        memdump_path = self.check_memdump_is_in_place()
+        pkg_to_dump_pid = self.get_single_process_id(package_name)
+        memdumps_dir = 'MEM_DUMPS'
+        piped_memdump_cmd = []
+
+        if dump_dest_type == 'local_emu_sdcard':
+            #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + package_name + '.dmp'
+            #dump_loc = '/storage/extSdcard/' + package_name + '_DUMP.dmp'
+            dump_loc = '/storage/sdcard/' + package_name + '_DUMP.dmp'  # Works
+            piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc] # Emulator Disk Location (Note the '>' redirection) # Works
+        elif dump_dest_type == 'remote_network':
+            host_ip = ''
+            port_num = ''
+            network_dump_loc = host_ip + ' ' + port_num
+            piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' ' + network_dump_loc]  # Network Location (no redirection operator) # Works
+        elif dump_dest_type == 'local_host_disk':
+            home_dir = os.path.expanduser('~')
+            host_dump_loc = os.path.join(home_dir, memdumps_dir, package_name + '_DUMP.dmp')
+
+            #piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + host_dump_loc] # Host Disk Location (Note the '>' redirection)
+            piped_memdump_cmd = [memdump_path , pkg_to_dump_pid, '>', host_dump_loc]  # Host Disk Location (Note the '>' redirection) # Works
+
+        memdump_cmd = ['shell']
+        for params in piped_memdump_cmd:
+            memdump_cmd.append(params)
+        self.run_adb_command('-e', memdump_cmd)
+
+        return
 
 
 

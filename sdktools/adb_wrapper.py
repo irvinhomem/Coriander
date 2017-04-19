@@ -150,33 +150,70 @@ class AdbWrapper(object):
         self.logger.debug('===========')
         self.logger.debug("Check if Memdump is in place:")
         self.logger.debug('===========')
+        memdump_path = ''
 
         #packages_list_dir = self.list_dir_contents(os.path.join(os.sep, 'data', 'data'))
         #list_dir_cmd = ['shell', 'ls', '-al', '/data/data']
         list_dir_cmd = ['shell', 'ls', '/data/data']
         packages_list_dir = self.run_adb_command_return_list(list_dir_cmd)
         memdump_pkg = 'com.zwerks.andromemdump'
-        #if any(memdump_pkg_name in item for item in packages_list_dir):
+        # #if any(memdump_pkg_name in item for item in packages_list_dir):
         memdump_pkg_name = [item for item in packages_list_dir if memdump_pkg in item]
         if len(memdump_pkg_name) > 0:
             #memdump_loc = os.path.join('data', 'data', memdump_pkg_name[0], 'files')
             abi_dir = self.check_cpu_abi()
-            #memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip()
-            memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip() + '/'
+            ##memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip()
+            #memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip() + '/'
+            memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' #+ abi_dir[0].strip() + '/'
             andromemdump_dir_list = self.run_adb_command_return_list(['shell', 'ls', '-al', memdump_loc])
         #cmd = [self.adb_loc, ls_memdump_cmd]
             memdump_criteria = 'memdump'
             memdump_present = [item for item in andromemdump_dir_list if memdump_criteria in item]
+            self.logger.debug('Memdump-Present LIST: {}'.format(memdump_present))
             if len(memdump_present) > 0:
                 self.logger.debug('*****')
                 self.logger.debug('MEMDUMP CORRECTLY INSTALLED IN: {}'.format(memdump_loc) )
                 self.logger.debug('*****')
+                memdump_path = memdump_loc + 'memdump' # '/' + 'memdump'
             else:
                 self.logger.debug('MEMDUMP not found IN: {}'.format(memdump_loc))
         else:
             self.logger.debug('MEMDUMP package DIR: [{}] not found'.format(memdump_pkg))
 
-        return
+        return memdump_path
+
+    def get_process_id(self, proc_name_str):
+
+        proc_id = None
+        ps_list_cmd = ['shell', 'ps']
+        process_list = self.run_adb_command_return_list(ps_list_cmd)
+
+        proc_item_list = [item for item in process_list if proc_name_str in item]
+        if len(proc_item_list) > 0:
+            self.logger.debug('Process: [{}] :: INFO: {}'. format(proc_name_str, proc_item_list[0]))
+            proc_items = self.parse_ps_info_line(proc_item_list[0])
+            proc_id = proc_items[1]
+        return proc_id
+
+    def parse_ps_info_line(self, proc_info_str):
+        proc_info_items = proc_info_str.split()
+        return proc_info_items
+
+    def get_single_process_id(self, proc_name_str):
+        proc_id = None
+        #ps_list_cmd = ['shell', '"', 'ps', '|', 'grep', proc_name_str, '"']
+        piped_cmd_str = 'ps | grep ' +  proc_name_str
+        ps_list_cmd = ['shell', piped_cmd_str]
+        process_list = self.run_adb_command_return_list(ps_list_cmd)
+
+        if len(process_list) > 0:
+            self.logger.debug('Process: [{}] :: INFO: {}'.format(proc_name_str, process_list[0]))
+            proc_items = self.parse_ps_info_line(process_list[0])
+            proc_id = proc_items[1]
+
+        self.logger.debug('Proc ID: {}'.format(proc_id))
+        return proc_id
+
 
 
 

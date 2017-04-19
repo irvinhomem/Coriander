@@ -86,7 +86,14 @@ class Recipe(object):
 
         # Dump process memory
         time.sleep(10)  # Delay before Starting Memory Dump
-        adb.check_memdump_is_in_place()
+        memdump_path = adb.check_memdump_is_in_place()
+        pkg_to_dump_pid = adb.get_single_process_id(an_apk_file.get_package_name())
+        #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + an_apk_file.get_package_name() + '.dmp'
+        #dump_loc = '/storage/extSdcard/' + an_apk_file.get_package_name() + '_DUMP.dmp'
+        dump_loc = '/storage/sdcard/' + an_apk_file.get_package_name() + '_DUMP.dmp'
+        piped_memdump_cmd = memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc
+        memdump_cmd = ['shell', piped_memdump_cmd]
+        adb.run_adb_command('-e', memdump_cmd)
 
 
         # Close app

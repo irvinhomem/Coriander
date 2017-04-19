@@ -1,6 +1,7 @@
 
 import logging
 import time
+import os
 
 #from sdktools import sdk_manager
 
@@ -21,6 +22,7 @@ class Recipe(object):
         self.sdk_manager = sdk_mgr
         self.apk_store = apk_store
         self.instructions = instructions
+        self.config_file = ''
 
     def run_recipe(self):
         self.logger.debug("****************************************")
@@ -90,9 +92,20 @@ class Recipe(object):
         pkg_to_dump_pid = adb.get_single_process_id(an_apk_file.get_package_name())
         #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + an_apk_file.get_package_name() + '.dmp'
         #dump_loc = '/storage/extSdcard/' + an_apk_file.get_package_name() + '_DUMP.dmp'
-        dump_loc = '/storage/sdcard/' + an_apk_file.get_package_name() + '_DUMP.dmp'
-        piped_memdump_cmd = memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc
-        memdump_cmd = ['shell', piped_memdump_cmd]
+        #dump_loc = '/storage/sdcard/' + an_apk_file.get_package_name() + '_DUMP.dmp'  # Works
+        #host_ip = ''
+        #port_num = ''
+        #network_dump_loc = host_ip + ' ' + port_num
+        home_dir = os.path.expanduser('~')
+        memdumps_dir = 'MEM_DUMPS'
+        host_dump_loc = os.path.join(home_dir, memdumps_dir, an_apk_file.get_package_name() + '_DUMP.dmp')
+        #piped_memdump_cmd = memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc # Emulator Disk Location (Note the '>' redirection) # Works
+        #piped_memdump_cmd = memdump_path + ' ' + pkg_to_dump_pid + ' > ' + host_dump_loc # Host Disk Location (Note the '>' redirection)
+        piped_memdump_cmd = [memdump_path , pkg_to_dump_pid, '>', host_dump_loc]  # Host Disk Location (Note the '>' redirection) # Works
+        #piped_memdump_cmd = memdump_path + ' ' + pkg_to_dump_pid + ' ' + network_dump_loc  # Network Location (no redirection operator) # Works
+        memdump_cmd = ['shell']
+        for params in piped_memdump_cmd:
+            memdump_cmd.append(params)
         adb.run_adb_command('-e', memdump_cmd)
 
 

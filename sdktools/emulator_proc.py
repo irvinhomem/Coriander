@@ -44,7 +44,7 @@ class EmulatorProc(threading.Thread):
         self.inject_emu_system_img_from_temp()
 
         #cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data', '-debug', 'init'] # '-report-console' could be an interesting idea
-        cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
+        cmd = [self.emulator_loc, '-avd', emulator_name, '-netfast' ,'-debug', 'init']
         # self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                             universal_newlines=True, shell=True)

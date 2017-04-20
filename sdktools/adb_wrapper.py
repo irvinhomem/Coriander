@@ -220,7 +220,7 @@ class AdbWrapper(object):
         self.logger.debug('Proc ID: {}'.format(proc_id))
         return proc_id
 
-    def dump_process_memory(self, package_name, dump_dest_type):
+    def dump_process_memory(self, package_name, sha256_filename, dump_dest_type):
         # May be move some of this to MemDumper package?
         memdump_path = self.check_memdump_is_in_place()
         pkg_to_dump_pid = self.get_single_process_id(package_name)
@@ -230,7 +230,7 @@ class AdbWrapper(object):
         if dump_dest_type == 'local_emu_sdcard':
             #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + package_name + '.dmp'
             #dump_loc = '/storage/extSdcard/' + package_name + '_DUMP.dmp'
-            dump_loc = '/storage/sdcard/' + package_name + '_DUMP.dmp'  # Works
+            dump_loc = '/storage/sdcard/' + sha256_filename +'_'+ package_name +'_DUMP.dmp'  # Works
             # Emulator Disk Location (Note the '>' redirection) # Works
             piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc]
         elif dump_dest_type == 'remote_network':
@@ -241,7 +241,7 @@ class AdbWrapper(object):
             piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' ' + network_dump_loc]
         elif dump_dest_type == 'local_host_disk':
             home_dir = os.path.expanduser('~')
-            host_dump_loc = os.path.join(home_dir, memdumps_dir, package_name + '_DUMP.dmp')
+            host_dump_loc = os.path.join(home_dir, memdumps_dir, sha256_filename + '_'+ package_name +'_DUMP.dmp')
             # Host Disk Location (Note the '>' redirection)
             #piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + host_dump_loc]
             # Host Disk Location (Note the '>' redirection) # Works

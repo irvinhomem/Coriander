@@ -106,7 +106,7 @@ class ApkStore(object):
         return str(sha256.hexdigest()).upper()
 
 
-    def get_all_apk_filenames_from_source(self, mal_state):
+    def get_all_apk_filenames_from_source(self, mal_state): # This is not used anymore
         url = self.apk_data_source_url
         self.logger.debug("Current APK Source: {}".format(url))
         apk_filenames = []
@@ -122,7 +122,7 @@ class ApkStore(object):
             self.logger.debug("Header Row: {}".format(self.row_zero_header))
             vt_detection_idx = self.row_zero_header.index('vt_detection')
             self.logger.debug("vt_detection INDEX: {}".format(vt_detection_idx))
-            for row in islice(reader, 10):
+            for row in islice(reader, 2): # This value here [islice(reader,VALUE)] throttles the number of APK's to be downloaded
                 if mal_state == 'malicious':
                     if int(row[vt_detection_idx]) > 0:
                         apk_filenames.append(row[0])

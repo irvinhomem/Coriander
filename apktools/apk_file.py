@@ -21,6 +21,7 @@ class ApkFile(object):
         # self.logger.setLevel(logging.WARNING)
 
         self.apk_rel_file_path = apk_path
+        self.apk_sha_256_filename = ''
         self.package_name = ''
         self.activity_list = []
         self.app_permissions_list = []

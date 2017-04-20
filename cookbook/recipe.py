@@ -90,7 +90,6 @@ class Recipe(object):
         time.sleep(10)  # Delay before Starting Memory Dump
         adb.dump_process_memory(an_apk_file.get_package_name(), 'local_host_disk')
 
-
         # Close app
         time.sleep(5) # Delay before closing
         force_stop_cmd = ['shell', 'am', 'force-stop', an_apk_file.get_package_name()]

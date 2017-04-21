@@ -38,6 +38,9 @@ class EmulatorWrapper(object):
         #self.emu_process.start()
         #self.emu_process.join()
 
+        self.logger.debug('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        self.logger.debug('--  Emulator Wrapper --> Starting New Emulator !  --')
+        self.logger.debug('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
         emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name, self.shared_queue, self.instance_id)
         emulator_process.start()
         #emulator_process.join()

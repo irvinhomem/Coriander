@@ -8,6 +8,8 @@ import multiprocessing as mp
 #import sdktools.sdk_manager
 from sdktools import sdk_manager, adb_proc
 from tqdm import tqdm
+import sys
+import time
 
 
 class AdbWrapper(object):
@@ -146,6 +148,20 @@ class AdbWrapper(object):
 
         return dir_list
 
+    def check_if_emulator_has_booted(self):
+        cmd = ['shell', 'getprop', 'sys.boot_completed']
+        resp = self.run_adb_command_return_list(cmd)
+        self.logger.debug("Command Output List: {}".format(resp))
+        while True:
+            self.logger.debug("Stripped condition: {}".format(resp[0].strip()))
+            if resp[0].strip() == '1':
+            #if int(resp[0].strip()) == 1:
+                self.logger.debug('Emulator has FINISHED BOOTING.')
+                break
+            else:
+                time.sleep(5)
+
+
     def check_cpu_abi(self):
         abi_list = self.run_adb_command_return_list(['shell','getprop', 'ro.product.cpu.abilist'])
         self.logger.debug('First in ABI list: {}'.format(abi_list[0]))
@@ -167,14 +183,15 @@ class AdbWrapper(object):
         memdump_pkg_name = [item for item in packages_list_dir if memdump_pkg in item]
         if len(memdump_pkg_name) > 0:
             #memdump_loc = os.path.join('data', 'data', memdump_pkg_name[0], 'files')
-            abi_dir = self.check_cpu_abi()
+            #abi_dir = self.check_cpu_abi()
             ##memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip()
             #memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' + abi_dir[0].strip() + '/'
             memdump_loc = '/data/data/' + memdump_pkg_name[0].strip() + '/files/' #+ abi_dir[0].strip() + '/'
             andromemdump_dir_list = self.run_adb_command_return_list(['shell', 'ls', '-al', memdump_loc])
+            # NB: The list returned above as trailing "new-line" characters that need to be stripped
         #cmd = [self.adb_loc, ls_memdump_cmd]
             memdump_criteria = 'memdump'
-            memdump_present = [item for item in andromemdump_dir_list if memdump_criteria in item]
+            memdump_present = [item for item in andromemdump_dir_list if memdump_criteria in item.strip()[-7:]]
             self.logger.debug('Memdump-Present LIST: {}'.format(memdump_present))
             if len(memdump_present) > 0:
                 self.logger.debug('*****')
@@ -183,8 +200,12 @@ class AdbWrapper(object):
                 memdump_path = memdump_loc + 'memdump' # '/' + 'memdump'
             else:
                 self.logger.debug('MEMDUMP not found IN: {}'.format(memdump_loc))
+                #exit(9)
+                sys.exit()
         else:
             self.logger.debug('MEMDUMP package DIR: [{}] not found'.format(memdump_pkg))
+            #exit(9)
+            sys.exit()
 
         return memdump_path
 
@@ -247,7 +268,7 @@ class AdbWrapper(object):
             # Host Disk Location (Note the '>' redirection) # Works
             #piped_memdump_cmd = [memdump_path , pkg_to_dump_pid, '>', host_dump_loc]
             # Host Disk Location WITH STRINGS Command from BusyBox (Note the '>' redirection) # Works
-            piped_memdump_cmd = [memdump_path, pkg_to_dump_pid + '| strings', '>', host_dump_loc]
+            piped_memdump_cmd = [memdump_path, pkg_to_dump_pid + ' | strings', '>', host_dump_loc]
 
         memdump_cmd = ['shell']
         for params in piped_memdump_cmd:

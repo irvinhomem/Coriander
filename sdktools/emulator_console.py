@@ -1,6 +1,7 @@
 import logging
 from telnetlib import Telnet
 import os
+import time
 
 class EmulatorConsole(object):
     '''
@@ -51,7 +52,35 @@ class EmulatorConsole(object):
         self.logger.debug("TELNET COMMAND: {}".format(cmd))
         self.logger.debug('++++++++++++++++++++')
         self.telnet_conn.write(cmd.encode('ascii') + b'\n')
-        self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))
+        try:
+            self.logger.debug('Telnet might throw an error here if the connection closes ...')
+            self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))
+        except ConnectionResetError:
+            self.logger.error("Telnet Connection was INTENTIONALLY closed. But still throws an error")
+            self.logger.error('Just Continue ...')
         self.logger.debug('--------------------------------------------------')
         self. logger.debug('------  CLEANING UP AFTER Telnet Command   ------')
         self.logger.debug('--------------------------------------------------')
+
+    def run_kill_command(self):
+        cmd = 'kill'
+        self.logger.debug('++++++++++++++++++++')
+        self.logger.debug("TELNET kill COMMAND: {}".format(cmd))
+        self.logger.debug('++++++++++++++++++++')
+        try:
+            self.telnet_conn.write(cmd.encode('ascii') + b'\n')
+            self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"Connection to host lost.")))
+            self.logger.debug('-------------------------------------------------------------------------')
+            self.logger.debug('*************** MANAGED TO CLOSE WITHOUT A PROBLEM **********************')
+            self.logger.debug('-------------------------------------------------------------------------')
+            #self.telnet_conn.close()
+        except ConnectionResetError as err:
+            self.logger.debug("Error Msg: {}".format(err.strerror))
+            self.logger.error("Telnet Connection was INTENTIONALLY closed. But still throws an error")
+            self.logger.error('Just Continue ...')
+        #if self.telnet_conn.
+        #self.telnet_conn.close()
+        self.logger.debug('----------------------------------------------------------------')
+        self.logger.debug('------  CLEANING UP AFTER Telnet Emulator Kill Command   ------')
+        self.logger.debug('----------------------------------------------------------------')
+        time.sleep(5)

@@ -31,7 +31,7 @@ class SdkManager(object):
         # #Set up emulator console (Need to pick up hostname and port from MSG_QUEUE)
         # self.set_up_new_emulator_console('localhost', 5554)
 
-        self.set_up_new_adb()
+        #self.set_up_new_adb()
 
     def set_android_sdk_path(self):
         self.android_SDK_path = self.find_android_sdk_path()
@@ -108,7 +108,6 @@ class SdkManager(object):
         self.emulator_instances.append(my_Emulator)
 
     def get_shared_message_queue(self):
-
         return self.shared_msg_queue
 
     def get_emulator_instance(self, index):
@@ -138,11 +137,12 @@ class SdkManager(object):
     def check_msg_queue(self):
         #emulator_ready = "Serial number of this emulator"
         #emulator_ready = "Adb connected, start proxing data"
-        emulator_ready_criteria = ["Serial number of this emulator",
-                          "emulator: Listening for console connections on port:",
-                          "emulator: Serial number of this emulator (for ADB):",
-                          "emulator: control console listening on port",
-                          "Adb connected, start proxing data"]
+        # emulator_ready_criteria = ["Serial number of this emulator",
+        #                   "emulator: Listening for console connections on port:",
+        #                   "emulator: Serial number of this emulator (for ADB):",
+        #                   "emulator: control console listening on port",
+        #                   "Adb connected, start proxing data"]
+        emulator_ready_criteria = ["Adb connected, start proxing data"]
         while True:
             line = self.shared_msg_queue.get()
             #if line is None:
@@ -156,7 +156,7 @@ class SdkManager(object):
                 # Give the emulator time to start up completely
                 self.logger.info('Waiting for EMULATOR (time delay) !')
                 time.sleep(20) # 15s # 20s
-                self.logger.info('EMULATOR IS READY!')
+                self.logger.info('EMULATOR IS Almost READY!')
 
                 break
 

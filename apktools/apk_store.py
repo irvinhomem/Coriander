@@ -138,7 +138,7 @@ class ApkStore(object):
 
         return  apk_filenames
 
-    def get_all_apk_file_data_from_source(self, mal_state):     # This is the function that we use in the recipe <---
+    def get_all_apk_file_data_from_source(self, mal_state):     # THIS is the function that we use in the recipe <---
         url = self.apk_data_source_url
         self.logger.debug("Current APK Source: {}".format(url))
         apk_file_data = []
@@ -156,13 +156,18 @@ class ApkStore(object):
             self.logger.debug("Header Row: {}".format(self.row_zero_header))
             vt_detection_idx = self.row_zero_header.index('vt_detection')
             self.logger.debug("vt_detection INDEX: {}".format(vt_detection_idx))
-            for row in islice(reader, 10): # This value here [islice(reader,VALUE)] throttles the number of APK's to be downloaded
-                if mal_state == 'malicious':
-                    if int(row[vt_detection_idx]) > 0:
-                        apk_file_data.append(row)
-                        self.logger.debug('APK SHA256 (name): {}'.format(row))
-                        # print("SHA256: {}".format(row[0]))
-                        # print(row)
+            # Approx 3850 to 1000 Malicious samples (1011)
+            # Approx 1490 to 1000 Benign samples (1009)
+            for row in islice(reader, 1490): # This value here [islice(reader,VALUE)] throttles the number of APK's to be downloaded
+                if row[vt_detection_idx] == '':
+                    # Skip because we don't know if the item was classified by VirusTotal as malicious or not (Do nothing)
+                    self.logger.debug("Data Store doesn't have value for MALICIOUS OR BENIGN. Skipping ...")
+                elif mal_state == 'malicious':
+                        if int(row[vt_detection_idx]) > 0:
+                            apk_file_data.append(row)
+                            self.logger.debug('APK SHA256 (name): {}'.format(row))
+                            # print("SHA256: {}".format(row[0]))
+                            # print(row)
                 elif mal_state == 'benign':
                     if int(row[vt_detection_idx]) == 0:  #row[0].index('vt_detection')
                         apk_file_data.append(row)

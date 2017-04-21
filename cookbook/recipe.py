@@ -47,8 +47,14 @@ class Recipe(object):
         # an_apk_file = self.apk_store.get_an_apk(filename_list[4])
 
         for single_apk_filename in filename_list:
+            # Set up Emulator for current task
+            self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
             emu = self.sdk_manager.get_emulator_instance(0)
+
             adb = self.sdk_manager.get_adb_instance(0)
+
+            # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
+            self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
             emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
             # Configure AndroMemdump for first run
@@ -121,3 +127,4 @@ class Recipe(object):
             emu_console.run_tty_command('kill')
             #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
             #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)
+            time.sleep(5)

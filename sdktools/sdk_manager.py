@@ -26,15 +26,10 @@ class SdkManager(object):
         self.shared_msg_queue = Queue()
 
         self.set_android_sdk_path()
-        self.set_up_new_emulator('Nexus_5_API_22_2', self.shared_msg_queue)
-        #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
-        self.check_msg_queue()
-        #self.logger.debug()
-        #self.shared_msg_queue.join_thread()
-        #self.logger.debug("Queue Length: %i" % self.shared_msg_queue.)
-
-        #Set up emulator console (Need to pick up hostname and port from MSG_QUEUE)
-        self.set_up_new_emulator_console('localhost', 5554)
+        # self.set_up_new_emulator('Nexus_5_API_22_2', self.shared_msg_queue)
+        #
+        # #Set up emulator console (Need to pick up hostname and port from MSG_QUEUE)
+        # self.set_up_new_emulator_console('localhost', 5554)
 
         self.set_up_new_adb()
 
@@ -103,7 +98,18 @@ class SdkManager(object):
         # Create a new Emulator instance and add it to the SDK Manager's list of emulators
         instance_id = len(self.emulator_instances)
         my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue, instance_id)
+
+        #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
+        self.check_msg_queue()
+        #self.logger.debug()
+        #self.shared_msg_queue.join_thread()
+        #self.logger.debug("Queue Length: %i" % self.shared_msg_queue.)
+
         self.emulator_instances.append(my_Emulator)
+
+    def get_shared_message_queue(self):
+
+        return self.shared_msg_queue
 
     def get_emulator_instance(self, index):
         if len(self.emulator_instances) > index:

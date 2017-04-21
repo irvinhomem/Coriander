@@ -52,3 +52,6 @@ class EmulatorConsole(object):
         self.logger.debug('++++++++++++++++++++')
         self.telnet_conn.write(cmd.encode('ascii') + b'\n')
         self.logger.debug('Telnet OUTPUT: {}'.format(self.telnet_conn.read_until(b"OK")))
+        self.logger.debug('--------------------------------------------------')
+        self. logger.debug('------  CLEANING UP AFTER Telnet Command   ------')
+        self.logger.debug('--------------------------------------------------')

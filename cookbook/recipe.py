@@ -48,15 +48,16 @@ class Recipe(object):
 
         for single_apk_filename in filename_list:
             # Set up Emulator for current task
-            self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
+            #self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
+            self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2')
             emu = self.sdk_manager.get_emulator_instance(0)
 
             self.sdk_manager.set_up_new_adb()
             adb = self.sdk_manager.get_adb_instance(0)
 
-            # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
-            self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
-            emu_console = self.sdk_manager.get_emulator_console_instance(0)
+            # # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
+            # self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
+            # emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
             adb.check_if_emulator_has_booted()
 
@@ -126,10 +127,10 @@ class Recipe(object):
             # Shutdown emulator first, then wipe-data
             # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans
 
-            # # ******************
-            # # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
-            # self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
-            # emu_console = self.sdk_manager.get_emulator_console_instance(0)
+            # ******************
+            # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
+            emu_console = self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
+            #emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
             # ******************
             # Kill emulator instance (Using the emulator telnet console "kill" command

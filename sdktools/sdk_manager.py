@@ -23,7 +23,7 @@ class SdkManager(object):
         self.emulator_instances = []
         self.emulator_console_instances = []
         self.adb_instances = []
-        self.shared_msg_queue = Queue()
+        # self.shared_msg_queue = Queue()
 
         self.set_android_sdk_path()
         # self.set_up_new_emulator('Nexus_5_API_22_2', self.shared_msg_queue)
@@ -93,14 +93,19 @@ class SdkManager(object):
             self.logger.error('ADB instance Index{} NOT found'.format(index))
             exit()
 
-    def set_up_new_emulator(self, emu_name, msq_queue):
-        self.logger.debug('Queue Type: %s' % str(type(msq_queue)))
+    def set_up_new_emulator(self, emu_name):
+    #def set_up_new_emulator(self, emu_name, msq_queue):
+        #self.logger.debug('Queue Type: %s' % str(type(msq_queue)))
+
         # Create a new Emulator instance and add it to the SDK Manager's list of emulators
         instance_id = len(self.emulator_instances)
-        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue, instance_id)
+        #my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue, instance_id)
+        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, instance_id)
 
         #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
-        self.check_msg_queue()
+
+        #self.check_msg_queue()
+
         #self.logger.debug()
         #self.shared_msg_queue.join_thread()
         #self.logger.debug("Queue Length: %i" % self.shared_msg_queue.)
@@ -119,8 +124,9 @@ class SdkManager(object):
 
     def set_up_new_emulator_console(self, hostname, port_num):
         # Create a new Emulator Console instance and append it to the SDK Manager's list of Emulator_Consoles
-         emu_console = emulator_console.EmulatorConsole(hostname, port_num)
-         self.emulator_console_instances.append(emu_console)
+        emu_console = emulator_console.EmulatorConsole(hostname, port_num)
+        self.emulator_console_instances.append(emu_console)
+        return emu_console
 
     def get_emulator_console_instance(self, index):
         if len(self.emulator_console_instances) > index:
@@ -134,30 +140,31 @@ class SdkManager(object):
         my_ADB = adb_wrapper.AdbWrapper(self)
         self.adb_instances.append(my_ADB)
 
-    def check_msg_queue(self):
-        #emulator_ready = "Serial number of this emulator"
-        #emulator_ready = "Adb connected, start proxing data"
-        # emulator_ready_criteria = ["Serial number of this emulator",
-        #                   "emulator: Listening for console connections on port:",
-        #                   "emulator: Serial number of this emulator (for ADB):",
-        #                   "emulator: control console listening on port",
-        #                   "Adb connected, start proxing data"]
-        emulator_ready_criteria = ["Adb connected, start proxing data"]
-        while True:
-            line = self.shared_msg_queue.get()
-            #if line is None:
-            #    break
-            self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
-            #if emulator_ready in line['content']:
-            #if any(item in emulator_ready for item in line['content']):
-            criterion = line['content']
-            # Check for "Emulator is Ready" criteria
-            if any(item in criterion for item in emulator_ready_criteria):
-                # Give the emulator time to start up completely
-                self.logger.info('Waiting for EMULATOR (time delay) !')
-                time.sleep(20) # 15s # 20s
-                self.logger.info('EMULATOR IS Almost READY!')
+    # def check_msg_queue(self):
+    #     #emulator_ready = "Serial number of this emulator"
+    #     #emulator_ready = "Adb connected, start proxing data"
+    #     # emulator_ready_criteria = ["Serial number of this emulator",
+    #     #                   "emulator: Listening for console connections on port:",
+    #     #                   "emulator: Serial number of this emulator (for ADB):",
+    #     #                   "emulator: control console listening on port",
+    #     #                   "Adb connected, start proxing data"]
+    #     emulator_ready_criteria = ["Adb connected, start proxing data"]
+    #     while True:
+    #         line = self.shared_msg_queue.get()
+    #         #if line is None:
+    #         #    break
+    #         self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
+    #         #if emulator_ready in line['content']:
+    #         #if any(item in emulator_ready for item in line['content']):
+    #         criterion = line['content']
+    #         # Check for "Emulator is Ready" criteria
+    #         if any(item in criterion for item in emulator_ready_criteria):
+    #             # Give the emulator time to start up completely
+    #             self.logger.info('Waiting for EMULATOR (time delay) !')
+    #             time.sleep(20) # 15s # 20s
+    #             self.logger.info('EMULATOR IS Almost READY!')
+    #
+    #             break
+    #
+    #         #self.shared_msg_queue.
 
-                break
-
-            #self.shared_msg_queue.

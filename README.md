@@ -1,5 +1,8 @@
 # Coriander
-Python scripts to coordinate Android apps for testing
+Python toolset to coordinate Android Emulator instances and Android Applications (APKs) 
+in order to collect Android Process Memory Metadata. The machine learning technique are currently
+ being applied on the metadata in order to assist in the triage of malicious android applications / 
+ misuse of processes.
 
 Footnotes:
 ----------

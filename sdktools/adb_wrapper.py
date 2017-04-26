@@ -10,6 +10,8 @@ from sdktools import sdk_manager, adb_proc
 from tqdm import tqdm
 import sys
 import time
+#from multiprocessing import Queue
+from queue import Queue, Empty
 
 
 class AdbWrapper(object):
@@ -25,10 +27,12 @@ class AdbWrapper(object):
 
         self.adb_loc = ''
         self.adb_process = None
+        self.shared_adb_msg_queue = Queue()
+        self.logger.debug('Queue Type: %s' % str(type(self.shared_adb_msg_queue)))
 
         self.set_adb_location(sdkManager.get_android_sdk_path())
         #self.start_adb_server()
-        self.adb_process = adb_proc.AdbProc(self.adb_loc, ['devices'])
+        self.adb_process = adb_proc.AdbProc(self.adb_loc, self.shared_adb_msg_queue, ['devices'])
         self.adb_process.start()
 
     def set_adb_location(self, sdk_path):
@@ -67,7 +71,7 @@ class AdbWrapper(object):
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s' % line)
 
-    def run_adb_command(self, adb_command, params):
+    def run_adb_command(self, adb_command, params, pos_msg, neg_msg):
         """
         @type params: list
         :param adb_command: 
@@ -86,14 +90,19 @@ class AdbWrapper(object):
 
         self.logger.debug('Args: {}'.format(self.adb_process.args))
 
-        self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+        #self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
         for line in self.adb_process.stdout:
             self.logger.debug('-->: %s ' % line)
+            self.put_to_msg_queue(line)
+
 
         if len(self.adb_process.stderr.read()) > 0:
-            for line in self.adb_process.stderr:
-                self.logger.debug('Err:-->: %s ' % line)
+            for err_line in self.adb_process.stderr:
+                self.logger.debug('Err:-->: %s ' % err_line)
+                self.put_to_msg_queue(err_line)
         #self.adb_process.communicate('\n')
+
+        self.check_adb_msg_queue(pos_msg, neg_msg)
 
         return
 
@@ -161,6 +170,53 @@ class AdbWrapper(object):
             else:
                 time.sleep(5)
 
+    def check_adb_msg_queue(self, pos_criteria, neg_criteria):
+        #timeout = time.time() + 60 * 1.5    # 90sec or 1.5min from now
+        # timeout = time.time() + 60 * 1  # 60sec or 1min from now
+        #timeout = time.time() + 60 * 0.5  # 30sec from now
+        #timeout = time.time() + 20  # 20sec from now
+        timeout = time.time() + 10  # 10sec from now
+        self.logger.debug('Expecting to timeout at: {}'.format(timeout))
+        while True:
+            #line = self.shared_adb_msg_queue.get()
+            self.logger.debug('Current time: {}'.format(time.time()))
+            try:
+                line = self.shared_adb_msg_queue.get_nowait()
+                #self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
+                self.logger.debug("Queue line Content: %s" % (line['content']))
+                content = line['content']
+                self.logger.debug('Checking ADB Msg Queue: => {}'.format(content))
+                if pos_criteria in content:
+                    self.logger.debug('Success in ADB Message: => {}'.format(content))
+                    break
+                elif neg_criteria in content:
+                    self.logger.debug('Failure in ADB Message: => {}'.format(content))
+                    self.logger.error(content)
+                    sys.exit()
+                else:
+                    self.logger.debug("ADB Msg Queue => Not hit 'pos' or 'neg' message yet (Could sleep here ...)")
+                    self.logger.debug(" ... or waiting for timeout: {}".format(timeout))
+                #     self.logger.debug('ADB Msg Queue sleeping for 5 sec ...')
+                #     time.sleep(5)
+            except Empty as empty_err:
+                self.logger.debug('ADB Message Queue is EMPTY ... : {}'.format(empty_err))
+                if time.time() > timeout:
+                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(timeout))
+                    break
+                time.sleep(5)
+                pass
+
+            # if time.time() > timeout:
+            #     self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(timeout))
+            #     break
+
+    def put_to_msg_queue(self, line):
+        self.logger.debug('ADB output:-->: %s' % line)
+
+        msg = dict()
+        # msg['instance_id'] = self.instance_id
+        msg['content'] = line
+        self.shared_adb_msg_queue.put_nowait(msg)
 
     def check_cpu_abi(self):
         abi_list = self.run_adb_command_return_list(['shell','getprop', 'ro.product.cpu.abilist'])
@@ -273,7 +329,7 @@ class AdbWrapper(object):
         memdump_cmd = ['shell']
         for params in piped_memdump_cmd:
             memdump_cmd.append(params)
-        self.run_adb_command('-e', memdump_cmd)
+        self.run_adb_command('-e', memdump_cmd, 'None', 'None')
 
         return
 

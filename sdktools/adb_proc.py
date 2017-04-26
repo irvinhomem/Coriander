@@ -7,7 +7,7 @@ import subprocess
 
 class AdbProc(threading.Thread):
 
-    def __init__(self, adb_loc, cmd_params):
+    def __init__(self, adb_loc, msg_queue, cmd_params):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.WARNING)
@@ -20,6 +20,7 @@ class AdbProc(threading.Thread):
         self.adb_loc = adb_loc
         self.adb_process = None
         self.cmd_params = cmd_params
+        self.adb_msg_queue = msg_queue
 
     def run(self):
         cmd = [self.adb_loc, self.cmd_params]
@@ -30,6 +31,11 @@ class AdbProc(threading.Thread):
         # p.start()
         # self.emu_proc_thread.start()
 
-        self.logger.debug('Emulator output: \n %s' % self.adb_process.stdout.readline())
+        #self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
         for line in self.adb_process.stdout:
-            self.logger.debug('-->: %s' % line)
+            self.logger.debug('ADB output:-->: %s' % line)
+
+            msg = dict()
+            #msg['instance_id'] = self.instance_id
+            msg['content'] = line
+            self.adb_msg_queue.put_nowait(msg)

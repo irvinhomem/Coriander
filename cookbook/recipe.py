@@ -5,6 +5,8 @@ import os
 
 #from sdktools import sdk_manager
 
+#GO_AHEAD_FLAG = True
+
 class Recipe(object):
 
     #def __init__(self, emulator, adb, apk_store):
@@ -23,6 +25,8 @@ class Recipe(object):
         self.apk_store = apk_store
         self.instructions = instructions
         self.config_file = ''
+        self.go_ahead_flag = True
+        #global GO_AHEAD_FLAG = True
 
     def run_recipe(self):
         self.logger.debug("****************************************")
@@ -67,7 +71,7 @@ class Recipe(object):
             andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
             andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
             andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
-            adb.run_adb_command('-e', andromemdump_cmd)
+            adb.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
             self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
             self.logger.debug("------ Running AndroMemdump - First RUN -------")
             self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -80,14 +84,19 @@ class Recipe(object):
             an_apk_file = self.apk_store.get_an_apk(single_apk_filename)
 
             self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
+
+            #if self.go_ahead_flag:
             #********************
             # Install the APK
             # Method 1
-            adb.run_adb_command('install', [an_apk_file.get_file_path()])
+            adb.run_adb_command('install', [an_apk_file.get_file_path()], 'Success', 'Failure')
             ### Method 2
             ##adb.install_apk(an_apk_file)
 
+            #adb.check_adb_msg_queue('Success', 'Failure')
             time.sleep(10)
+
+            #if self.go_ahead_flag:
             # *******************
             # Go to FIRST activity and dump memory //// OR //// Go through each activity and dump memory ?
             # *******************
@@ -101,7 +110,7 @@ class Recipe(object):
             #full_cmd = ['shell', 'ls']
             #full_cmd = ['devices']
             #full_cmd = 'shell am start' # -n ' #+ pkg_and_activity_name
-            adb.run_adb_command('-e', full_cmd)
+            adb.run_adb_command('-e', full_cmd, 'Starting: Intent', 'None')
             #adb.run_adb_command('shell', full_cmd)
 
             # Dump process memory
@@ -109,15 +118,15 @@ class Recipe(object):
             adb.dump_process_memory(an_apk_file.get_package_name(), single_apk_filename, 'local_host_disk')
 
             # Close app
-            time.sleep(5) # Delay before closing
+            #time.sleep(5) # Delay before closing
             force_stop_cmd = ['shell', 'am', 'force-stop', an_apk_file.get_package_name()]
-            adb.run_adb_command('-e', force_stop_cmd)
+            adb.run_adb_command('-e', force_stop_cmd, 'None', 'None')
 
             # *******************
             # Uninstall the APK
             time.sleep(5)  # Delay before Uninstalling
             # Method 1
-            adb.run_adb_command('uninstall', [an_apk_file.get_package_name()])
+            adb.run_adb_command('uninstall', [an_apk_file.get_package_name()], 'Success', 'Failure')
             ### Method 2
             ##adb.uninstall_apk(an_apk_file)
 
@@ -146,3 +155,9 @@ class Recipe(object):
         self.logger.debug('+++++++++++++++++++++++++++++++++++++')
         self.logger.debug('----------  END OF RECIPE -----------')
         self.logger.debug('+++++++++++++++++++++++++++++++++++++')
+
+    def check_go_ahead_flag(self):
+        return self.go_ahead_flag
+
+    def set_go_ahead_flag(self, new_bool_val):
+        self.go_ahead_flag = new_bool_val

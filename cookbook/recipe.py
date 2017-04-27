@@ -1,5 +1,6 @@
 
 import logging
+import datetime
 import time
 import os
 
@@ -33,6 +34,12 @@ class Recipe(object):
         self.logger.debug("RUNNING RECIPE: {} ". format(self.instructions))
         self.logger.debug("****************************************")
 
+        # **************************
+        #Set up APK 'SUCCESS' and FAILURE logs
+        failed_log_file = os.path.join('logs', 'FAILED_' + datetime.datetime.now().isoformat().replace(':', '-') + '.log')
+        success_log_file = os.path.join('logs', 'Success_' + datetime.datetime.now().isoformat().replace(':', '-') + '.log')
+        # *************************
+
         #apk_data_list = self.apk_store.get_all_apk_file_data_from_source('malicious')
         apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
         #apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
@@ -44,6 +51,7 @@ class Recipe(object):
         #    self.logger.debug("APK item names: {}".format(apk_item))
 
         filename_list = self.apk_store.get_single_column_as_list('sha256')
+        #self.apk_store.write_list_to_file()
         self.logger.debug('Filename List LENGTH: {}'.format(len(filename_list)))
 
         # # Get 3rd filename (just for testing)
@@ -161,8 +169,11 @@ class Recipe(object):
                 self.logger.debug('Time: {}'.format(time.localtime(time.time())))
                 self.logger.debug('Skipping to next APK ...')
                 self.logger.debug('**********************************************************************')
+
+                self.append_output_to_file(failed_log_file, single_apk_filename + '::' +an_apk_file.get_package_name())
                 self.go_ahead_flag = True
             else:
+                self.append_output_to_file(success_log_file, single_apk_filename + '::' + an_apk_file.get_package_name())
                 self.logger.debug('Successfully dealt with: [{}]'.format(an_apk_file.get_package_name()))
 
             self.logger.debug('------ FINISHED DEALING WITH APK: {} ----------'.format(an_apk_file.get_package_name()))
@@ -176,3 +187,8 @@ class Recipe(object):
 
     def set_go_ahead_flag(self, new_bool_val):
         self.go_ahead_flag = new_bool_val
+
+    def append_output_to_file(self, file_path, string_to_append):
+        line_to_append = string_to_append + '::' + datetime.datetime.now().isoformat().replace(':','-') + '\n'
+        with open(file_path, "a") as output_file:
+            output_file.write(line_to_append)

@@ -9,6 +9,7 @@ from itertools import islice
 import codecs
 import hashlib
 from tqdm import tqdm
+import datetime
 
 from apktools import apk_file
 
@@ -174,7 +175,17 @@ class ApkStore(object):
                         self.logger.debug('APK SHA256 (name): {}'.format(row))
 
         self.all_apk_data = apk_file_data
+
+        timestamp = datetime.datetime.now().isoformat().replace(':',"-")
+        output_file_path = os.path.join('logs', timestamp + '_LOG.csv')
+        self.write_list_to_file(output_file_path, apk_file_data)
+
         return  apk_file_data
+
+    def write_list_to_file(self, file_path, list_to_write):
+        with open(file_path, "w", newline="") as out_file:
+            csv_writer = csv.writer(out_file)
+            csv_writer.writerows(list_to_write)
 
     def get_single_column_as_list(self, column_name):
         column_as_list = []

@@ -181,10 +181,11 @@ class AdbWrapper(object):
         #timeout = time.time() + 60 * 0.5  # 30sec from now
         #timeout = time.time() + 20  # 20sec from now
         timeout = time.time() + 10  # 10sec from now
-        self.logger.debug('Expecting to timeout at: {}'.format(time.localtime(timeout)))
+        time_fmt = '%'
+        self.logger.debug('Expecting to timeout at: {}'.format(time.asctime(time.localtime(timeout))))
         while True:
             #line = self.shared_adb_msg_queue.get()
-            self.logger.debug('Current time: {}'.format(time.localtime(time.time())))
+            self.logger.debug('Current time: {}'.format(time.asctime(time.localtime(time.time()))))
             try:
                 line = self.shared_adb_msg_queue.get_nowait()
                 #self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
@@ -201,13 +202,13 @@ class AdbWrapper(object):
                     #sys.exit()
                 else:
                     self.logger.debug("ADB Msg Queue => Not hit 'pos' or 'neg' message yet (Could sleep here ...)")
-                    self.logger.debug(" ... or waiting for timeout: {}".format(time.localtime(timeout)))
+                    self.logger.debug(" ... or waiting for timeout: {}".format(time.asctime(time.localtime(timeout))))
                 #     self.logger.debug('ADB Msg Queue sleeping for 5 sec ...')
                 #     time.sleep(5)
             except Empty as empty_err:
                 self.logger.debug('ADB Message Queue is EMPTY ... : {}'.format(empty_err))
                 if time.time() > timeout:
-                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.localtime(timeout)))
+                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.asctime(time.localtime(timeout))))
                     break
                 time.sleep(5)
                 pass

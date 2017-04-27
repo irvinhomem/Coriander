@@ -146,3 +146,4 @@ ENV/
 /config/APK_PATH.json
 /temp/
 /system-img-qcow2/
+/logs/

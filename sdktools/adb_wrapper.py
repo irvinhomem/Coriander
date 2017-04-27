@@ -78,6 +78,7 @@ class AdbWrapper(object):
         :param params: 
         :return: 
         """
+        adb_cmd_successful = True
         cmd = [self.adb_loc, adb_command]
         for item in params:
             cmd.append(item)
@@ -102,9 +103,9 @@ class AdbWrapper(object):
                 self.put_to_msg_queue(err_line)
         #self.adb_process.communicate('\n')
 
-        self.check_adb_msg_queue(pos_msg, neg_msg)
+        adb_cmd_successful = self.check_adb_msg_queue(pos_msg, neg_msg)
 
-        return
+        return adb_cmd_successful
 
     def install_apk(self, apk_file):
         cmd =[self.adb_loc, 'install', apk_file.get_file_path()]
@@ -159,9 +160,12 @@ class AdbWrapper(object):
 
     def check_if_emulator_has_booted(self):
         cmd = ['shell', 'getprop', 'sys.boot_completed']
-        resp = self.run_adb_command_return_list(cmd)
-        self.logger.debug("Command Output List: {}".format(resp))
+        # resp = self.run_adb_command_return_list(cmd)
+        # self.logger.debug("Command Output List: {}".format(resp))
         while True:
+            resp = self.run_adb_command_return_list(cmd)
+            self.logger.debug("Command Output List: {}".format(resp))
+
             self.logger.debug("Stripped condition: {}".format(resp[0].strip()))
             if resp[0].strip() == '1':
             #if int(resp[0].strip()) == 1:
@@ -171,15 +175,16 @@ class AdbWrapper(object):
                 time.sleep(5)
 
     def check_adb_msg_queue(self, pos_criteria, neg_criteria):
+        success_flag = True
         #timeout = time.time() + 60 * 1.5    # 90sec or 1.5min from now
         # timeout = time.time() + 60 * 1  # 60sec or 1min from now
         #timeout = time.time() + 60 * 0.5  # 30sec from now
         #timeout = time.time() + 20  # 20sec from now
         timeout = time.time() + 10  # 10sec from now
-        self.logger.debug('Expecting to timeout at: {}'.format(timeout))
+        self.logger.debug('Expecting to timeout at: {}'.format(time.localtime(timeout)))
         while True:
             #line = self.shared_adb_msg_queue.get()
-            self.logger.debug('Current time: {}'.format(time.time()))
+            self.logger.debug('Current time: {}'.format(time.localtime(time.time())))
             try:
                 line = self.shared_adb_msg_queue.get_nowait()
                 #self.logger.debug("Queue line: [%i] : %s" % (line['instance_id'], line['content']))
@@ -192,16 +197,17 @@ class AdbWrapper(object):
                 elif neg_criteria in content:
                     self.logger.debug('Failure in ADB Message: => {}'.format(content))
                     self.logger.error(content)
-                    sys.exit()
+                    success_flag = False
+                    #sys.exit()
                 else:
                     self.logger.debug("ADB Msg Queue => Not hit 'pos' or 'neg' message yet (Could sleep here ...)")
-                    self.logger.debug(" ... or waiting for timeout: {}".format(timeout))
+                    self.logger.debug(" ... or waiting for timeout: {}".format(time.localtime(timeout)))
                 #     self.logger.debug('ADB Msg Queue sleeping for 5 sec ...')
                 #     time.sleep(5)
             except Empty as empty_err:
                 self.logger.debug('ADB Message Queue is EMPTY ... : {}'.format(empty_err))
                 if time.time() > timeout:
-                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(timeout))
+                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.localtime(timeout)))
                     break
                 time.sleep(5)
                 pass
@@ -209,6 +215,7 @@ class AdbWrapper(object):
             # if time.time() > timeout:
             #     self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(timeout))
             #     break
+        return success_flag
 
     def put_to_msg_queue(self, line):
         self.logger.debug('ADB output:-->: %s' % line)
@@ -299,6 +306,7 @@ class AdbWrapper(object):
 
     def dump_process_memory(self, package_name, sha256_filename, dump_dest_type):
         # May be move some of this to MemDumper package?
+        dump_memory_success = True
         memdump_path = self.check_memdump_is_in_place()
         pkg_to_dump_pid = self.get_single_process_id(package_name)
         memdumps_dir = 'MEM_DUMPS'
@@ -329,9 +337,9 @@ class AdbWrapper(object):
         memdump_cmd = ['shell']
         for params in piped_memdump_cmd:
             memdump_cmd.append(params)
-        self.run_adb_command('-e', memdump_cmd, 'None', 'None')
+        dump_memory_success = self.run_adb_command('-e', memdump_cmd, 'None', 'None')
 
-        return
+        return dump_memory_success
 
 
 

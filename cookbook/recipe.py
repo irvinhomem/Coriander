@@ -65,70 +65,74 @@ class Recipe(object):
 
             adb.check_if_emulator_has_booted()
 
-            # Configure AndroMemdump for first run
-            # (Given the system.img.qcow2 file preconfigured with Andromemdump-beta installed in System partition)
-            andromemdump_pkg_name = 'com.zwerks.andromemdumpbeta'
-            andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
-            andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
-            andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
-            adb.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
-            self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-            self.logger.debug("------ Running AndroMemdump - First RUN -------")
-            self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-            time.sleep(15)
+            if self.go_ahead_flag:
+                # Configure AndroMemdump for first run
+                # (Given the system.img.qcow2 file preconfigured with Andromemdump-beta installed in System partition)
+                andromemdump_pkg_name = 'com.zwerks.andromemdumpbeta'
+                andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
+                andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
+                andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
+                self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+                self.logger.debug("------ Running AndroMemdump - First RUN -------")
+                self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+                self.go_ahead_flag = adb.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
+                time.sleep(15)
 
-            # Andromemdump can be closed, or killed here,
-            # because the configuration is done while running the MainActivity [onCreate()]
+                # Andromemdump can be closed, or killed here,
+                # because the configuration is done while running the MainActivity [onCreate()]
 
-            self.logger.debug('APK Filename: {}'.format(single_apk_filename))
-            an_apk_file = self.apk_store.get_an_apk(single_apk_filename)
+            if self.go_ahead_flag:
+                # Get an APK from the list / APK Store
+                self.logger.debug('APK Filename: {}'.format(single_apk_filename))
+                an_apk_file = self.apk_store.get_an_apk(single_apk_filename)
 
-            self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
+                self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
+                #********************
+                # Install the APK
+                # Method 1
+                self.go_ahead_flag = adb.run_adb_command('install', [an_apk_file.get_file_path()], 'Success', 'Failure')
+                ### Method 2
+                ##adb.install_apk(an_apk_file)
 
-            #if self.go_ahead_flag:
-            #********************
-            # Install the APK
-            # Method 1
-            adb.run_adb_command('install', [an_apk_file.get_file_path()], 'Success', 'Failure')
-            ### Method 2
-            ##adb.install_apk(an_apk_file)
+                #adb.check_adb_msg_queue('Success', 'Failure')
+                time.sleep(10)
 
-            #adb.check_adb_msg_queue('Success', 'Failure')
-            time.sleep(10)
+            if self.go_ahead_flag:
+                # *******************
+                # Go to FIRST activity and dump memory //// OR //// Go through each activity and dump memory ?
+                # *******************
+                # Run first activity
+                # adb shell am start -n com.package.name/com.package.name.xyz.ActivityName
+                pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_activity_list()[1]
+                self.logger.debug('Package and Activity name to run: {}'.format(pkg_and_activity_name))
+                #adb.run_adb_command(['shell', 'am', 'start', '-n', pkg_and_activity_name])
+                full_cmd = ['shell', 'am', 'start', '-n', pkg_and_activity_name]
+                #full_cmd = ['am', 'start', '-n', pkg_and_activity_name]
+                #full_cmd = ['shell', 'ls']
+                #full_cmd = ['devices']
+                #full_cmd = 'shell am start' # -n ' #+ pkg_and_activity_name
+                self.go_ahead_flag = adb.run_adb_command('-e', full_cmd, 'Starting: Intent', 'None')
+                #adb.run_adb_command('shell', full_cmd)
 
-            #if self.go_ahead_flag:
-            # *******************
-            # Go to FIRST activity and dump memory //// OR //// Go through each activity and dump memory ?
-            # *******************
-            # Run first activity
-            # adb shell am start -n com.package.name/com.package.name.xyz.ActivityName
-            pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_activity_list()[1]
-            self.logger.debug('Package and Activity name to run: {}'.format(pkg_and_activity_name))
-            #adb.run_adb_command(['shell', 'am', 'start', '-n', pkg_and_activity_name])
-            full_cmd = ['shell', 'am', 'start', '-n', pkg_and_activity_name]
-            #full_cmd = ['am', 'start', '-n', pkg_and_activity_name]
-            #full_cmd = ['shell', 'ls']
-            #full_cmd = ['devices']
-            #full_cmd = 'shell am start' # -n ' #+ pkg_and_activity_name
-            adb.run_adb_command('-e', full_cmd, 'Starting: Intent', 'None')
-            #adb.run_adb_command('shell', full_cmd)
+            if self.go_ahead_flag:
+                # Dump process memory
+                time.sleep(10)  # Delay before Starting Memory Dump
+                self.go_ahead_flag = adb.dump_process_memory(an_apk_file.get_package_name(), single_apk_filename, 'local_host_disk')
 
-            # Dump process memory
-            time.sleep(10)  # Delay before Starting Memory Dump
-            adb.dump_process_memory(an_apk_file.get_package_name(), single_apk_filename, 'local_host_disk')
+            if self.go_ahead_flag:
+                # Close app
+                #time.sleep(5) # Delay before closing
+                force_stop_cmd = ['shell', 'am', 'force-stop', an_apk_file.get_package_name()]
+                self.go_ahead_flag = adb.run_adb_command('-e', force_stop_cmd, 'None', 'None')
 
-            # Close app
-            #time.sleep(5) # Delay before closing
-            force_stop_cmd = ['shell', 'am', 'force-stop', an_apk_file.get_package_name()]
-            adb.run_adb_command('-e', force_stop_cmd, 'None', 'None')
-
-            # *******************
-            # Uninstall the APK
-            time.sleep(5)  # Delay before Uninstalling
-            # Method 1
-            adb.run_adb_command('uninstall', [an_apk_file.get_package_name()], 'Success', 'Failure')
-            ### Method 2
-            ##adb.uninstall_apk(an_apk_file)
+            if self.go_ahead_flag:
+                # *******************
+                # Uninstall the APK
+                time.sleep(5)  # Delay before Uninstalling
+                # Method 1
+                self.go_ahead_flag = adb.run_adb_command('uninstall', [an_apk_file.get_package_name()], 'Success', 'Failure')
+                ### Method 2
+                ##adb.uninstall_apk(an_apk_file)
 
             # ******************
             # Reset Emulator / AVD instance back to original snapshot, or wipe-data
@@ -150,6 +154,17 @@ class Recipe(object):
             #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
             #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)
             time.sleep(5)
+
+            if self.go_ahead_flag == False:
+                self.logger.debug('**********************************************************************')
+                self.logger.debug('Something FAILED with APK: {}'.format(an_apk_file.get_package_name()))
+                self.logger.debug('Time: {}'.format(time.localtime(time.time())))
+                self.logger.debug('Skipping to next APK ...')
+                self.logger.debug('**********************************************************************')
+                self.go_ahead_flag = True
+            else:
+                self.logger.debug('Successfully dealt with: [{}]'.format(an_apk_file.get_package_name()))
+
             self.logger.debug('------ FINISHED DEALING WITH APK: {} ----------'.format(an_apk_file.get_package_name()))
 
         self.logger.debug('+++++++++++++++++++++++++++++++++++++')

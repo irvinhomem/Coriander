@@ -8,6 +8,23 @@ For now, Machine Learning techniques are being applied on the metadata in order
 to assist in the triage of malicious Android applications, as a precursor to deeper forensic
 analysis.
 
+(To be updated ...)
+
+Dependencies:
+------------
+
+How to set it up:
+----------------
+- Directories:
+    
+- Config File:
+    
+- Inputs:
+    
+- Outputs:
+    
+    
+
 Footnotes:
 ----------
 - Yeah, i know it's a corny name. Couldn't come up with something better.

@@ -311,7 +311,8 @@ class AdbWrapper(object):
         memdump_path = self.check_memdump_is_in_place()
         pkg_to_dump_pid = None
         # Wait for the process to start in order to get a Process ID
-        timeout =  time.time() + 60 * 1 # Timeout after 1min (90 sec)
+        #timeout =  time.time() + 60 * 1 # Timeout after 1min (60 sec)
+        timeout = time.time() + 60 * 0.5  # Timeout after 1min (30 sec)
         while pkg_to_dump_pid is None:
             pkg_to_dump_pid = self.get_single_process_id(package_name)
             self.logger.debug("WAITING for Process to Start-up [Proc_id to appear]: {}".format(package_name))

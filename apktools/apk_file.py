@@ -96,27 +96,42 @@ class ApkFile(object):
                 activity_label_list = []
                 criteria = ['Main', 'MainActivity']
                 #activity_name_list = [item for item in self.activity_list if criteria in item]
+
+                first_dotted_activity = None
                 for activity_name_item in self.activity_list:
+                    # Store first item if it has a dot (might be used in the condition towards the end)
+                    if first_dotted_activity is None:
+                        if '.' in activity_name_item:
+                            first_dotted_activity = activity_name_item
                     for criterion_item in criteria:
                         if criterion_item.lower() in activity_name_item.lower():
                             activity_label_list.append(activity_name_item)
                             # Preference for .MainActivity
                             if criterion_item.lower() == criteria[1].lower:
                                 activity_label = activity_name_item
+                                self.logger.debug("Picked the activity with 'MainActivity in the name: {}".format(activity_label))
                                 return activity_label
                             # Else pick the first in the list
                             else:
                                 activity_label = activity_label_list[0]
+                                self.logger.debug("Multiple labels with 'Main' in the name ...picking the first: {}".format(activity_label))
                         else:
                             # Check if there is at least 1 dot (in the name)
-                            if '.' in activity_name_item:
-                                # Get the first one, and break
-                                activity_label = activity_name_item
-                                break
-                            else:
-                                activity_label = self.activity_list[0]
+                            # if '.' in activity_name_item:
+                            #     # Get the first one, and break
+                            #     activity_label = activity_name_item
+                            #     break
+                            # else:
+                            #    activity_label = self.activity_list[0]
+                            # Pick the stored 'First-Dotted' Activity that we stored in the beginning of the loop
+                            activity_label = first_dotted_activity
+                            self.logger.debug('Picked the First-Dotted-ActivityLabel : {}'.format(activity_label))
             else:
+                # Just pick the first activity, and if it doesn't have a dot, try add a dot to it
                 activity_label = self.activity_list[0]
+                if '.' not in activity_label:
+                    activity_label = '.' + activity_label
+                    self.logger.debug("Tried to prepend a dot [.] to the ActivityLabel: {}".format(activity_label))
         else:
             self.logger.debug('No Activities in APK')
             self.logger.error('No Activities in APK')

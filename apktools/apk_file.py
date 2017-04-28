@@ -88,3 +88,32 @@ class ApkFile(object):
     def get_activity_list(self):
         return self.activity_list
 
+    def get_first_or_main_activity_label(self):
+        activity_label = None
+        activity_num = len(self.activity_list)
+        if activity_num > 0:
+            if activity_num > 1:
+                activity_label_list = []
+                criteria = ['Main', 'MainActivity']
+                #activity_name_list = [item for item in self.activity_list if criteria in item]
+                for activity_name_item in self.activity_list:
+                    for criterion_item in criteria:
+                        if criterion_item.lower() in activity_name_item.lower():
+                            activity_label_list.append(activity_name_item)
+                            # Preference for .MainActivity
+                            if criterion_item.lower() == criteria[1].lower:
+                                activity_label = activity_name_item
+                            # Else pick the first in the list
+                            else:
+                                activity_label = activity_label_list[0]
+                        else:
+                            activity_label = self.activity_list[0]
+            else:
+                activity_label = self.activity_list[0]
+        else:
+            self.logger.debug('No Activities in APK')
+            self.logger.error('No Activities in APK')
+
+        self.logger.debug('ACTIVITY name chosen: {}'.format(activity_label))
+        return activity_label
+

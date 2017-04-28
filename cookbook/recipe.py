@@ -111,7 +111,8 @@ class Recipe(object):
                 # *******************
                 # Run first activity
                 # adb shell am start -n com.package.name/com.package.name.xyz.ActivityName
-                pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_activity_list()[1]
+                #pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_activity_list()[1]
+                pkg_and_activity_name = an_apk_file.get_package_name() + '/' + an_apk_file.get_first_or_main_activity_label()
                 self.logger.debug('Package and Activity name to run: {}'.format(pkg_and_activity_name))
                 #adb.run_adb_command(['shell', 'am', 'start', '-n', pkg_and_activity_name])
                 full_cmd = ['shell', 'am', 'start', '-n', pkg_and_activity_name]
@@ -161,7 +162,8 @@ class Recipe(object):
             emu_console.run_kill_command()
             #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
             #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)
-            time.sleep(5)
+            #time.sleep(2)
+            #time.sleep(5)
 
             if self.go_ahead_flag == False:
                 self.logger.debug('**********************************************************************')
@@ -177,6 +179,8 @@ class Recipe(object):
                 self.logger.debug('Successfully dealt with: [{}]'.format(an_apk_file.get_package_name()))
 
             self.logger.debug('------ FINISHED DEALING WITH APK: {} ----------'.format(an_apk_file.get_package_name()))
+            # Delay before next loop starts to ensure that Emulator process (qemu-img-i386) is killed/dead
+            time.sleep(10)
 
         self.logger.debug('+++++++++++++++++++++++++++++++++++++')
         self.logger.debug('----------  END OF RECIPE -----------')

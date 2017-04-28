@@ -103,11 +103,18 @@ class ApkFile(object):
                             # Preference for .MainActivity
                             if criterion_item.lower() == criteria[1].lower:
                                 activity_label = activity_name_item
+                                return activity_label
                             # Else pick the first in the list
                             else:
                                 activity_label = activity_label_list[0]
                         else:
-                            activity_label = self.activity_list[0]
+                            # Check if there is at least 1 dot (in the name)
+                            if '.' in activity_name_item:
+                                # Get the first one, and break
+                                activity_label = activity_name_item
+                                break
+                            else:
+                                activity_label = self.activity_list[0]
             else:
                 activity_label = self.activity_list[0]
         else:

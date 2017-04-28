@@ -309,7 +309,19 @@ class AdbWrapper(object):
         # May be move some of this to MemDumper package?
         dump_memory_success = True
         memdump_path = self.check_memdump_is_in_place()
-        pkg_to_dump_pid = self.get_single_process_id(package_name)
+        pkg_to_dump_pid = None
+        # Wait for the process to start in order to get a Process ID
+        timeout =  time.time() + 60 * 1 # Timeout after 1min (90 sec)
+        while pkg_to_dump_pid is None:
+            pkg_to_dump_pid = self.get_single_process_id(package_name)
+            self.logger.debug("WAITING for Process to Start-up [Proc_id to appear]: {}".format(package_name))
+            time.sleep(5)
+            if time.time() > timeout:
+                self.logger.debug('TIME-OUT passed while waiting for ProcID to appear')
+                self.logger.error('TIME-OUT passed while waiting for ProcID to appear')
+                dump_memory_success = False
+                return dump_memory_success
+
         memdumps_dir = 'MEM_DUMPS'
         piped_memdump_cmd = []
 

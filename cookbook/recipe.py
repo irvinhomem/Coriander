@@ -168,7 +168,7 @@ class Recipe(object):
             if self.go_ahead_flag == False:
                 self.logger.debug('**********************************************************************')
                 self.logger.debug('Something FAILED with APK: {}'.format(an_apk_file.get_package_name()))
-                self.logger.debug('Time: {}'.format(time.localtime(time.time())))
+                self.logger.debug('Time: {}'.format(time.asctime(time.localtime(time.time()))))
                 self.logger.debug('Skipping to next APK ...')
                 self.logger.debug('**********************************************************************')
 

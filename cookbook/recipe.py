@@ -93,9 +93,9 @@ class Recipe(object):
                 # Get an APK from the list / APK Store
                 self.logger.debug('APK Filename: {}'.format(single_apk_filename))
                 an_apk_file = self.apk_store.get_an_apk(single_apk_filename)
-                if an_apk_file.check_if_parse_was_successful() == False:
-                    self.go_ahead_flag = False
+                self.go_ahead_flag = an_apk_file.check_if_parse_was_successful()
 
+            if self.go_ahead_flag:
                 self.logger.debug("APK TEMP file path: {}".format(an_apk_file.get_file_path()))
                 #********************
                 # Install the APK

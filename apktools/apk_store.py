@@ -90,6 +90,7 @@ class ApkStore(object):
                     #apk_file_path = temp_filepath
 
                 # Check the hash if the transfer has completed successfully
+                # Create an APK_File object (checking if parsing went correctly also)
                 apk = apk_file.ApkFile(temp_filepath)
                 self.logger.debug('Local SHA 256: {}'.format(self.get_sha256_hash(temp_filepath)))
             else:

@@ -32,7 +32,7 @@ class ApkFile(object):
         self.main_package_name = ''
         self.version_code = ''
 
-        self.parse_android_manifest()
+        self.successful_parse = self.parse_android_manifest()
 
     def get_file_path(self):
         return self.apk_rel_file_path
@@ -43,25 +43,37 @@ class ApkFile(object):
         #manifest_path = os.path.join(self.apk_file_path, 'AndroidManifest.xml')
         #ap = axmlprinter.AXMLPrinter(open(manifest_path, 'rb').read())
 
-        #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
-        #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
-        apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
-        self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
-        manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
-        ap = axmlprinter.AXMLPrinter(manifest_file)
+        successful_parse = True
 
-        #buff = minidom.parseString(ap.getBuff()).toxml()
-        ## "buff" contains the parsed AXML in Minidom format and can be printed to screen
+        try:
+            #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
+            #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
+            apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
+            self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
+            manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
+            ap = axmlprinter.AXMLPrinter(manifest_file)
 
-        xml_doc = ET.fromstring(ap.getBuff())
+            #buff = minidom.parseString(ap.getBuff()).toxml()
+            ## "buff" contains the parsed AXML in Minidom format and can be printed to screen
 
-        self.root_tag = xml_doc.tag
-        self.child_elements = len(list(xml_doc))
-        self.main_package_name = xml_doc.get('package')
-        self.version_code = xml_doc.get('{http://schemas.android.com/apk/res/android}versionCode')
+            xml_doc = ET.fromstring(ap.getBuff())
 
-        self.load_activity_list(xml_doc)
-        self.load_permissions_list(xml_doc)
+            self.root_tag = xml_doc.tag
+            self.child_elements = len(list(xml_doc))
+            self.main_package_name = xml_doc.get('package')
+            self.version_code = xml_doc.get('{http://schemas.android.com/apk/res/android}versionCode')
+
+            self.load_activity_list(xml_doc)
+            self.load_permissions_list(xml_doc)
+        except:
+            self.logger.debug('Something failed with parsing the APK file ...')
+            self.logger.error('Something failed with parsing the APK file ...')
+            successful_parse = False
+
+        return successful_parse
+
+    def check_if_parse_was_successful(self):
+        return self.successful_parse
 
     def load_activity_list(self, xmldoc):
         #for activity in xmldoc.findall('application/activity'):

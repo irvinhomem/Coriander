@@ -21,7 +21,7 @@ class ApkFile(object):
         # self.logger.setLevel(logging.WARNING)
 
         self.apk_rel_file_path = apk_path
-        self.apk_sha_256_filename = ''
+        self.apk_sha_256_filename = self.apk_rel_file_path.rsplit(os.path.sep, 1)[1]
         self.package_name = ''
         self.activity_list = []
         self.app_permissions_list = []
@@ -29,7 +29,7 @@ class ApkFile(object):
 
         self.root_tag = ''
         self.child_elements = 0
-        self.main_package_name = ''
+        self.main_package_name = None
         self.version_code = ''
 
         self.successful_parse = self.parse_android_manifest()
@@ -65,6 +65,10 @@ class ApkFile(object):
 
             self.load_activity_list(xml_doc)
             self.load_permissions_list(xml_doc)
+
+            if not self.do_apk_parse_sanity_check():
+                successful_parse = False
+                return successful_parse
         except:
             self.logger.debug('Something failed with parsing the APK file ...')
             self.logger.error('Something failed with parsing the APK file ...')
@@ -74,6 +78,17 @@ class ApkFile(object):
             self.logger.debug('APK was parsed successfully - Package name: {}'.format(self.main_package_name))
 
         return successful_parse
+
+    def do_apk_parse_sanity_check(self):
+        sanity_success = True
+        if self.main_package_name in (None, '') or not self.main_package_name.strip():
+            self.logger.debug("PACKAGE name is empty - FAILED: {}".format(self.apk_sha_256_filename))
+            sanity_success = False
+        if len(self.activity_list) == 0:
+            self.logger.debug("PACKAGE contains NO ACTIVITIES: {}".format(self.apk_sha_256_filename))
+            sanity_success = False
+
+        return sanity_success
 
     def check_if_parse_was_successful(self):
         return self.successful_parse

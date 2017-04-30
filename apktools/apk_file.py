@@ -70,6 +70,9 @@ class ApkFile(object):
             self.logger.error('Something failed with parsing the APK file ...')
             successful_parse = False
 
+        if successful_parse:
+            self.logger.debug('APK was parsed successfully - Package name: {}'.format(self.main_package_name))
+
         return successful_parse
 
     def check_if_parse_was_successful(self):

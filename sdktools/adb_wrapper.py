@@ -183,7 +183,7 @@ class AdbWrapper(object):
             # Emulator has probably hung up / crashed
             self.logger.debug("Emulator boot ... TIMED OUT: {}".format(time.asctime(time.localtime(time.time()))))
             # IF process has started, try to kill it
-            proc_name = 'qemu-img'
+            proc_name = 'qemu-system'   # qemu-system-i386
             for proc in psutil.process_iter():
                 if proc_name in proc.name():
                     proc.kill()

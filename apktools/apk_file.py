@@ -166,12 +166,14 @@ class ApkFile(object):
                             # Pick the stored 'First-Dotted' Activity that we stored in the beginning of the loop
                             activity_label = first_dotted_activity
                             self.logger.debug('Picked the First-Dotted-ActivityLabel : {}'.format(activity_label))
-            else:
-                # Just pick the first activity, and if it doesn't have a dot, try add a dot to it
-                activity_label = self.activity_list[0]
-                if '.' not in activity_label:
-                    activity_label = '.' + activity_label
-                    self.logger.debug("Tried to prepend a dot [.] to the ActivityLabel: {}".format(activity_label))
+            #else:
+            #else:
+                if activity_label in (None, ''):
+                    # Just pick the first activity, and if it doesn't have a dot, try add a dot to it
+                    activity_label = self.activity_list[0]
+                    if '.' not in activity_label:
+                        activity_label = '.' + activity_label
+                        self.logger.debug("Tried to prepend a dot [.] to the ActivityLabel: {}".format(activity_label))
         else:
             self.logger.debug('No Activities in APK')
             self.logger.error('No Activities in APK')

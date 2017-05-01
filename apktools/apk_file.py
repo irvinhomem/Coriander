@@ -89,8 +89,13 @@ class ApkFile(object):
             self.logger.debug("PACKAGE name is empty - FAILED: {}".format(self.apk_sha_256_filename))
             self.main_package_name = 'FAILED_TO_PARSE_' + self.apk_sha_256_filename
             sanity_success = False
+
         if len(self.activity_list) == 0:
             self.logger.debug("PACKAGE contains NO ACTIVITIES: {}".format(self.apk_sha_256_filename))
+            sanity_success = False
+
+        if self.get_first_or_main_activity_label() in (None, '') or not self.get_first_or_main_activity_label().strip():
+            self.logger.debug("Cannot reliably determine 'First or Main Activity in: {}".format(self.apk_sha_256_filename))
             sanity_success = False
 
         return sanity_success

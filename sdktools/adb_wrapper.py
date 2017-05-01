@@ -12,7 +12,7 @@ import sys
 import time
 #from multiprocessing import Queue
 from queue import Queue, Empty
-
+import psutil
 
 class AdbWrapper(object):
 
@@ -159,10 +159,14 @@ class AdbWrapper(object):
         return dir_list
 
     def check_if_emulator_has_booted(self):
+        successfully_booted = True
         cmd = ['shell', 'getprop', 'sys.boot_completed']
         # resp = self.run_adb_command_return_list(cmd)
         # self.logger.debug("Command Output List: {}".format(resp))
-        while True:
+        timeout = time.time() + 60 * 1 # 60 sec or 1min timeout
+        self.logger.debug('Checking if Emulator has finished booting. \n'
+                          'Expecting to timeout at: {}'.format(time.asctime(time.localtime(timeout))))
+        while time.time() <= timeout:
             resp = self.run_adb_command_return_list(cmd)
             self.logger.debug("Command Output List: {}".format(resp))
 
@@ -170,9 +174,23 @@ class AdbWrapper(object):
             if resp[0].strip() == '1':
             #if int(resp[0].strip()) == 1:
                 self.logger.debug('Emulator has FINISHED BOOTING.')
-                break
+                #break
+                successfully_booted = True
+                return successfully_booted
             else:
                 time.sleep(5)
+        else:
+            # Emulator has probably hung up / crashed
+            self.logger.debug("Emulator boot ... TIMED OUT: {}".format(time.asctime(time.localtime(time.time()))))
+            # IF process has started, try to kill it
+            proc_name = 'qemu-img'
+            for proc in psutil.process_iter():
+                if proc_name in proc.name():
+                    proc.kill()
+            successfully_booted = False
+
+        return successfully_booted
+
 
     def check_adb_msg_queue(self, pos_criteria, neg_criteria):
         success_flag = True

@@ -12,6 +12,10 @@ analysis.
 
 Dependencies:
 ------------
+Non-Standard Python libs:
+* tqdm
+* AXMLParserpy
+* psutil
 
 How to set it up:
 ----------------

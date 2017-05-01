@@ -27,6 +27,7 @@ class Recipe(object):
         self.instructions = instructions
         self.config_file = ''
         self.go_ahead_flag = True
+        self.emulator_booted_success = False
         #global GO_AHEAD_FLAG = True
 
     def run_recipe(self):
@@ -59,19 +60,36 @@ class Recipe(object):
         # an_apk_file = self.apk_store.get_an_apk(filename_list[4])
 
         for single_apk_filename in filename_list:
-            # Set up Emulator for current task
-            #self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
-            self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2')
-            emu = self.sdk_manager.get_emulator_instance(0)
+            self.emulator_booted_success = False
+            if self.go_ahead_flag:
+                trial_num = 0
+                timeout = time.time() + 60 * 3
+                # Try to set up Emulator within timeout period
+                while time.time() <= timeout:
+                    # Set up Emulator for current task
+                    #self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
+                    self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2')
+                    emu = self.sdk_manager.get_emulator_instance(0)
 
-            self.sdk_manager.set_up_new_adb()
-            adb = self.sdk_manager.get_adb_instance(0)
+                    self.sdk_manager.set_up_new_adb()
+                    adb = self.sdk_manager.get_adb_instance(0)
 
-            # # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
-            # self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
-            # emu_console = self.sdk_manager.get_emulator_console_instance(0)
+                    # # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
+                    # self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
+                    # emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
-            adb.check_if_emulator_has_booted()
+                    self.go_ahead_flag = adb.check_if_emulator_has_booted()
+                    self.logger.debug('Trying to boot up emulator... \n'
+                                      'Current Time: {}'.format(time.asctime(time.localtime(time.time()))))
+                    self.logger.debug('Trial number: {}'.format(trial_num))
+                    if self.go_ahead_flag:
+                        self.emulator_booted_success = True
+                        break
+                    time.sleep(5)
+                    trial_num += 1
+                else:
+                    self.go_ahead_flag = False
+                    self.logger.debug('Emulator Failed to boot: {}'.format(time.asctime(time.localtime(time.time()))))
 
             if self.go_ahead_flag:
                 # Configure AndroMemdump for first run
@@ -146,27 +164,30 @@ class Recipe(object):
                 ### Method 2
                 ##adb.uninstall_apk(an_apk_file)
 
-            # ******************
-            # Reset Emulator / AVD instance back to original snapshot, or wipe-data
-            # Couldn't get snapshotting working, so "wipe-data" is the next best option for now.
-            # Shutdown emulator first, then wipe-data
-            # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans
+            if self.emulator_booted_success:
+                # ******************
+                # Reset Emulator / AVD instance back to original snapshot, or wipe-data
+                # Couldn't get snapshotting working, so "wipe-data" is the next best option for now.
+                # Shutdown emulator first, then wipe-data
+                # Looks like you have to wipe [wipe-data] before booting the emulator ... so change of plans
 
-            # ******************
-            # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
-            emu_console = self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
-            #emu_console = self.sdk_manager.get_emulator_console_instance(0)
+                # ******************
+                # Set up Emulator Console (Need to pick up hostname and port from MSG_QUEUE)
+                emu_console = self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
+                #emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
-            # ******************
-            # Kill emulator instance (Using the emulator telnet console "kill" command
-            # or, telnet console "vm stop" command; or, telnet console "avd stop" command)
-            time.sleep(5)  # Delay before Killing Emulator Instance
-            #emu_console.run_tty_command('kill')
-            emu_console.run_kill_command()
-            #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
-            #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)
-            #time.sleep(2)
-            #time.sleep(5)
+                # ******************
+                # Kill emulator instance (Using the emulator telnet console "kill" command
+                # or, telnet console "vm stop" command; or, telnet console "avd stop" command)
+                time.sleep(5)  # Delay before Killing Emulator Instance
+                #emu_console.run_tty_command('kill')
+                emu_console.run_kill_command()
+                #emu_console.run_tty_command('vm stop') # Didn't seem to work (doesn't exit in Build Tools v26)
+                #emu_console.run_tty_command('avd stop') # Seems to freeze the VM, not to kill and quit (May be needed before 'kill'?)
+                #time.sleep(2)
+                #time.sleep(5)
+            else:
+                self.logger.debug('Emulator Failed to boot after timeout (3min) ...')
 
             if self.go_ahead_flag == False:
                 #if an_apk_file.get_package_name() in (None, '') or not an_apk_file.get_package_name().strip():

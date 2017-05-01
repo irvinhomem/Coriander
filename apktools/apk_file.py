@@ -71,7 +71,7 @@ class ApkFile(object):
                 return successful_parse
         except Exception as err:
             self.logger.debug("APK Parsing failed: {}".format(err))
-            self.logger.debug('Traceback:\n {}'.format(traceback.print_stack()))
+            #self.logger.debug('Traceback:\n {}'.format(traceback.print_exc()))
             self.logger.error('Something failed with parsing the APK file ...')
 
             self.do_apk_parse_sanity_check()

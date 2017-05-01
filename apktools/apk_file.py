@@ -45,17 +45,18 @@ class ApkFile(object):
 
         successful_parse = True
 
+
+        #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
+        #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
+        apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
+        self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
+        manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
+        ap = axmlprinter.AXMLPrinter(manifest_file)
+
+        #buff = minidom.parseString(ap.getBuff()).toxml()
+        ## "buff" contains the parsed AXML in Minidom format and can be printed to screen
+
         try:
-            #apk_archive = zipfile.ZipFile.open(self.apk_file_path, 'rb')
-            #a_file = axmlparserpy.apk.APK(self.apk_file_path).get_file('AndroidManifest.xml')
-            apk_archive = zipfile.ZipFile(self.apk_rel_file_path)
-            self.logger.debug('APK File list: {}'.format(apk_archive.namelist()))
-            manifest_file = apk_archive.open('AndroidManifest.xml', 'r').read()
-            ap = axmlprinter.AXMLPrinter(manifest_file)
-
-            #buff = minidom.parseString(ap.getBuff()).toxml()
-            ## "buff" contains the parsed AXML in Minidom format and can be printed to screen
-
             xml_doc = ET.fromstring(ap.getBuff())
 
             self.root_tag = xml_doc.tag
@@ -69,10 +70,13 @@ class ApkFile(object):
             if not self.do_apk_parse_sanity_check():
                 successful_parse = False
                 return successful_parse
-        except:
-            self.logger.debug('Something failed with parsing the APK file ...')
+        except Exception as err:
+            self.logger.debug("APK Parsing failed: {}".format(err))
             self.logger.error('Something failed with parsing the APK file ...')
+
+            self.do_apk_parse_sanity_check()
             successful_parse = False
+            return successful_parse
 
         if successful_parse:
             self.logger.debug('APK was parsed successfully - Package name: {}'.format(self.main_package_name))
@@ -83,6 +87,7 @@ class ApkFile(object):
         sanity_success = True
         if self.main_package_name in (None, '') or not self.main_package_name.strip():
             self.logger.debug("PACKAGE name is empty - FAILED: {}".format(self.apk_sha_256_filename))
+            self.main_package_name = 'FAILED_TO_PARSE_' + self.apk_sha_256_filename
             sanity_success = False
         if len(self.activity_list) == 0:
             self.logger.debug("PACKAGE contains NO ACTIVITIES: {}".format(self.apk_sha_256_filename))

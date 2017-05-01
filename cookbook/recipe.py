@@ -105,7 +105,8 @@ class Recipe(object):
                 ##adb.install_apk(an_apk_file)
 
                 #adb.check_adb_msg_queue('Success', 'Failure')
-                time.sleep(10)
+                #time.sleep(10)
+                time.sleep(5)
 
             if self.go_ahead_flag:
                 # *******************
@@ -168,6 +169,7 @@ class Recipe(object):
             #time.sleep(5)
 
             if self.go_ahead_flag == False:
+                #if an_apk_file.get_package_name() in (None, '') or not an_apk_file.get_package_name().strip():
                 self.logger.debug('**********************************************************************')
                 self.logger.debug('Something FAILED with APK: {}'.format(an_apk_file.get_package_name()))
                 self.logger.debug('Time: {}'.format(time.asctime(time.localtime(time.time()))))

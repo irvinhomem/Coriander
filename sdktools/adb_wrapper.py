@@ -227,7 +227,9 @@ class AdbWrapper(object):
                 self.logger.debug('ADB Message Queue is EMPTY ... : {}'.format(empty_err))
                 if time.time() > timeout:
                     self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.asctime(time.localtime(timeout))))
-                    break
+                    success_flag = False
+                    return success_flag
+                    #break
                 time.sleep(5)
                 pass
 

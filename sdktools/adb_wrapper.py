@@ -85,17 +85,38 @@ class AdbWrapper(object):
         self.logger.debug('===========')
         self.logger.debug("ADB Command Run: {}".format(cmd))
         self.logger.debug('===========')
+
         self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                              universal_newlines=True, shell=True) # stdin= subprocess.PIPE,
         #self.adb_process.communicate(' '.join(cmd))
+        # FIXME (Hackish solution)
+        if adb_command in ['uninstall']:
+            self.logger.debug('Preparing to Uninstall ...')
+            try:
+                self.adb_process.wait(10)
+            except subprocess.TimeoutExpired as timeout_err:
+                self.adb_process.kill()
+                self.adb_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                                    universal_newlines=True, shell=True)  # stdin= subprocess.PIPE,
 
         self.logger.debug('Args: {}'.format(self.adb_process.args))
+        if self.adb_process.stdout not in (None, ''):
+            #self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
+            # timeout = time.time() + 20 # 20sec time out
+            # while time.time() <= timeout:
+                #if self.adb_process.stdout.readable():
 
-        #self.logger.debug('ADB output: \n %s' % self.adb_process.stdout.readline())
-        for line in self.adb_process.stdout:
-            self.logger.debug('-->: %s ' % line)
-            self.put_to_msg_queue(line)
+            for line in self.adb_process.stdout:
+                self.logger.debug('-->: %s ' % line)
+                self.put_to_msg_queue(line)
+            # else:
+            #     adb_cmd_successful = False
+            #     return adb_cmd_successful
 
+        else:
+            self.logger.debug('ADB Process BROKE SOMETHING while executing command: {}'.format(cmd))
+            adb_cmd_successful = False
+            return adb_cmd_successful
 
         if len(self.adb_process.stderr.read()) > 0:
             for err_line in self.adb_process.stderr:
@@ -194,13 +215,14 @@ class AdbWrapper(object):
 
     def check_adb_msg_queue(self, pos_criteria, neg_criteria):
         success_flag = True
+        error_timeout = time.time() + 60 * 1.5    # 90sec or 1.5min from now
         #timeout = time.time() + 60 * 1.5    # 90sec or 1.5min from now
         # timeout = time.time() + 60 * 1  # 60sec or 1min from now
         #timeout = time.time() + 60 * 0.5  # 30sec from now
         #timeout = time.time() + 20  # 20sec from now
-        timeout = time.time() + 10  # 10sec from now
+        normal_timeout = time.time() + 10  # 10sec from now
         time_fmt = '%'
-        self.logger.debug('Expecting to timeout at: {}'.format(time.asctime(time.localtime(timeout))))
+        self.logger.debug('Expecting to timeout at: {}'.format(time.asctime(time.localtime(normal_timeout))))
         while True:
             #line = self.shared_adb_msg_queue.get()
             self.logger.debug('Current time: {}'.format(time.asctime(time.localtime(time.time()))))
@@ -220,16 +242,16 @@ class AdbWrapper(object):
                     #sys.exit()
                 else:
                     self.logger.debug("ADB Msg Queue => Not hit 'pos' or 'neg' message yet (Could sleep here ...)")
-                    self.logger.debug(" ... or waiting for timeout: {}".format(time.asctime(time.localtime(timeout))))
+                    self.logger.debug(" ... or waiting for timeout: {}".format(time.asctime(time.localtime(normal_timeout))))
                 #     self.logger.debug('ADB Msg Queue sleeping for 5 sec ...')
                 #     time.sleep(5)
             except Empty as empty_err:
                 self.logger.debug('ADB Message Queue is EMPTY ... : {}'.format(empty_err))
-                if time.time() > timeout:
-                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.asctime(time.localtime(timeout))))
-                    success_flag = False
-                    return success_flag
-                    #break
+                if time.time() > normal_timeout:
+                    self.logger.debug('EXCEEDED TIMEOUT [{}] in ADB Message Queue: '.format(time.asctime(time.localtime(normal_timeout))))
+                    # success_flag = False
+                    # return success_flag
+                    break
                 time.sleep(5)
                 pass
 

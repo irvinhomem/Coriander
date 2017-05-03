@@ -102,6 +102,7 @@ class Recipe(object):
                 self.logger.debug("------ Running AndroMemdump - First RUN -------")
                 self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
                 self.go_ahead_flag = adb.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
+                #time.sleep(15)
                 time.sleep(15)
 
                 # Andromemdump can be closed, or killed here,

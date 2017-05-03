@@ -161,7 +161,7 @@ class ApkStore(object):
             # Approx 3850 to 1000 Malicious samples (1011)
             # Approx 1490 to 1000 Benign samples (1009)
             # This value here [islice(reader, start_point, VALUE)] throttles the number of APK's to be downloaded
-            for row in islice(reader, 727, 5490):
+            for row in islice(reader, 1263, 5490):
                 if row[vt_detection_idx] == '':
                     # Skip because we don't know if the item was classified by VirusTotal as malicious or not (Do nothing)
                     self.logger.debug("Data Store doesn't have value for MALICIOUS OR BENIGN. Skipping ...")

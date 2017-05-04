@@ -273,6 +273,22 @@ class AdbWrapper(object):
         self.logger.debug('First in ABI list: {}'.format(abi_list[0]))
         return abi_list
 
+    def first_run_andromemdumpbeta(self):
+        successful_run = False
+        andromemdump_pkg_name = 'com.zwerks.andromemdumpbeta'
+        andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
+        andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
+        andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
+        self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+        self.logger.debug("------ Running AndroMemdump - First RUN -------")
+        self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+        run_success = self.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
+        #proc_id = None
+        if run_success:
+            successful_run, proc_id = self.check_proc_id_status(andromemdump_pkg_name)
+
+        return successful_run
+
     def check_memdump_is_in_place(self):
 
         self.logger.debug('===========')
@@ -347,53 +363,67 @@ class AdbWrapper(object):
         self.logger.debug('Proc ID: {}'.format(proc_id))
         return proc_id
 
-    def dump_process_memory(self, package_name, sha256_filename, dump_dest_type):
-        # May be move some of this to MemDumper package?
-        dump_memory_success = True
-        memdump_path = self.check_memdump_is_in_place()
-        pkg_to_dump_pid = None
+    def check_proc_id_status(self, package_name):
+        running_success = False
+        proc_id = None
         # Wait for the process to start in order to get a Process ID
         #timeout =  time.time() + 60 * 1 # Timeout after 1min (60 sec)
         timeout = time.time() + 60 * 0.5  # Timeout after 1min (30 sec)
-        while pkg_to_dump_pid is None:
-            pkg_to_dump_pid = self.get_single_process_id(package_name)
+        while proc_id is None:
+            proc_id = self.get_single_process_id(package_name)
             self.logger.debug("WAITING for Process to Start-up [Proc_id to appear]: {}".format(package_name))
             time.sleep(5)
+            if proc_id is not None:
+                self.logger.debug('Process ID for Package: {} = {}'.format(package_name, proc_id))
+                running_success = True
+                return running_success, proc_id
             if time.time() > timeout:
                 self.logger.debug('TIME-OUT passed while waiting for ProcID to appear')
                 self.logger.error('TIME-OUT passed while waiting for ProcID to appear')
-                dump_memory_success = False
-                return dump_memory_success
+                running_success = False
+                return running_success, proc_id
 
-        memdumps_dir = 'MEM_DUMPS'
-        piped_memdump_cmd = []
+        return running_success, proc_id
 
-        if dump_dest_type == 'local_emu_sdcard':
-            #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + package_name + '.dmp'
-            #dump_loc = '/storage/extSdcard/' + package_name + '_DUMP.dmp'
-            dump_loc = '/storage/sdcard/' + sha256_filename +'_'+ package_name +'_DUMP.dmp'  # Works
-            # Emulator Disk Location (Note the '>' redirection) # Works
-            piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc]
-        elif dump_dest_type == 'remote_network':
-            host_ip = ''
-            port_num = ''
-            network_dump_loc = host_ip + ' ' + port_num
-            # Network Location (no redirection operator) # Works
-            piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' ' + network_dump_loc]
-        elif dump_dest_type == 'local_host_disk':
-            home_dir = os.path.expanduser('~')
-            host_dump_loc = os.path.join(home_dir, memdumps_dir, sha256_filename + '_'+ package_name +'_DUMP.dmp')
-            # Host Disk Location (Note the '>' redirection)
-            #piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + host_dump_loc]
-            # Host Disk Location (Note the '>' redirection) # Works
-            #piped_memdump_cmd = [memdump_path , pkg_to_dump_pid, '>', host_dump_loc]
-            # Host Disk Location WITH STRINGS Command from BusyBox (Note the '>' redirection) # Works
-            piped_memdump_cmd = [memdump_path, pkg_to_dump_pid + ' | strings', '>', host_dump_loc]
 
-        memdump_cmd = ['shell']
-        for params in piped_memdump_cmd:
-            memdump_cmd.append(params)
-        dump_memory_success = self.run_adb_command('-e', memdump_cmd, 'None', 'None')
+    def dump_process_memory(self, package_name, sha256_filename, dump_dest_type):
+        # May be move some of this to MemDumper package?
+        dump_memory_success = False
+        memdump_path = self.check_memdump_is_in_place()
+        #pkg_to_dump_pid = None
+        # Wait for the process to start in order to get a Process ID
+        (process_running, pkg_to_dump_pid)  = self.check_proc_id_status(package_name)
+
+        if process_running:
+            memdumps_dir = 'MEM_DUMPS'
+            piped_memdump_cmd = []
+
+            if dump_dest_type == 'local_emu_sdcard':
+                #dump_loc = '/storage/extSdcard/MEM_DUMPS/' + package_name + '.dmp'
+                #dump_loc = '/storage/extSdcard/' + package_name + '_DUMP.dmp'
+                dump_loc = '/storage/sdcard/' + sha256_filename +'_'+ package_name +'_DUMP.dmp'  # Works
+                # Emulator Disk Location (Note the '>' redirection) # Works
+                piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + dump_loc]
+            elif dump_dest_type == 'remote_network':
+                host_ip = ''
+                port_num = ''
+                network_dump_loc = host_ip + ' ' + port_num
+                # Network Location (no redirection operator) # Works
+                piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' ' + network_dump_loc]
+            elif dump_dest_type == 'local_host_disk':
+                home_dir = os.path.expanduser('~')
+                host_dump_loc = os.path.join(home_dir, memdumps_dir, sha256_filename + '_'+ package_name +'_DUMP.dmp')
+                # Host Disk Location (Note the '>' redirection)
+                #piped_memdump_cmd = [memdump_path + ' ' + pkg_to_dump_pid + ' > ' + host_dump_loc]
+                # Host Disk Location (Note the '>' redirection) # Works
+                #piped_memdump_cmd = [memdump_path , pkg_to_dump_pid, '>', host_dump_loc]
+                # Host Disk Location WITH STRINGS Command from BusyBox (Note the '>' redirection) # Works
+                piped_memdump_cmd = [memdump_path, pkg_to_dump_pid + ' | strings', '>', host_dump_loc]
+
+            memdump_cmd = ['shell']
+            for params in piped_memdump_cmd:
+                memdump_cmd.append(params)
+            dump_memory_success = self.run_adb_command('-e', memdump_cmd, 'None', 'None')
 
         return dump_memory_success
 

@@ -17,7 +17,7 @@ from sdktools import sdk_manager, emulator_proc, emulator_console
 class EmulatorWrapper(object):
 
     #def __init__(self, sdkManager, emu_name, msq_queue, instance_id):
-    def __init__(self, sdkManager, emu_name, instance_id):
+    def __init__(self, sdkManager, emu_name, tcp_dump_params, instance_id):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.WARNING)
@@ -28,11 +28,13 @@ class EmulatorWrapper(object):
 
         self.ON_POSIX = 'posix' in sys.builtin_module_names
         self.emulator_loc = ''
+        #self.emulator_loc_x86 = ''
         self.emu_process = None
         self.shared_msg_queue = Queue()
         self.logger.debug('Queue Type: %s' % str(type(self.shared_msg_queue)))
         #self.shared_queue = msq_queue
         self.instance_id = instance_id
+        self.tcpdump_params =  tcp_dump_params
 
         self.set_emulator_location(sdkManager.get_android_sdk_path())
         #self.start_up_emulator(emu_name)
@@ -44,7 +46,8 @@ class EmulatorWrapper(object):
         self.logger.debug('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
         self.logger.debug('--  Emulator Wrapper --> Starting New Emulator !  --')
         self.logger.debug('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name, self.shared_msg_queue, self.instance_id)
+        emulator_process = emulator_proc.EmulatorProc(self.emulator_loc, emu_name, self.tcpdump_params, self.shared_msg_queue, self.instance_id)
+        #emulator_process = emulator_proc.EmulatorProc(self.emulator_loc_x86, emu_name, self.tcpdump_params, self.shared_msg_queue, self.instance_id)
         emulator_process.start()
         #emulator_process.join()
 
@@ -58,9 +61,15 @@ class EmulatorWrapper(object):
 
     def set_emulator_location(self, sdk_path):
         tools_path = 'tools'
+        emulators_path = 'emulator'
 
         if platform.system() == 'Windows':
             self.emulator_loc = os.path.join(sdk_path, tools_path, 'emulator.exe')
+            # Do not use the /emulators folder ... the emulator's there are slow and buggy' (emulator.exe,emulator-x86 etc)
+            # Don't use them with the "-engine classic" directive either
+            # It will overwrite the Original AVD Image files ...causing a mess
+            #self.emulator_loc = os.path.join(sdk_path, emulators_path, 'emulator.exe')
+            #self.emulator_loc_x86 = os.path.join(sdk_path, emulators_path, 'emulator-x86.exe')
         elif platform.system() == 'Linux':
             self.emulator_loc = os.path.join(sdk_path, tools_path, 'emulator')
         elif platform.system() == 'Darwin':
@@ -77,14 +86,19 @@ class EmulatorWrapper(object):
 
         return self.emulator_loc
 
-    def start_up_emulator(self, emulator_name):
+    def start_up_emulator(self, emulator_name, tcpdump_params):
         #[This is not explicitly used at the moment]
         # Original simple command to start up emulator
         #cmd = [self.emulator_loc, '-avd', emulator_name]
         # With debugging options since Google has changed the normal output of the "AVD Serial" and "console port"
         #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug', 'init']
         #cmd = [self.emulator_loc, '-avd', emulator_name, '-debug-init']
-        cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data','-debug-init']
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data','-debug-init']
+        #tcpdump_params = ['-tcpdump', os.path.join(homedir), 'MEM_DUMPS', mal_state]
+        tcpdump_cmd = ''
+        for params in tcpdump_params:
+            tcpdump_cmd = tcpdump_cmd + params + ' '
+        cmd = [self.emulator_loc, '-avd', emulator_name, tcpdump_cmd, '-netfast' ,'-debug', 'init']
         self.logger.debug('Emulator Command: {}'.format(cmd))
         #self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)

@@ -68,7 +68,9 @@ class Recipe(object):
                 while time.time() <= timeout:
                     # Set up Emulator for current task
                     #self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', self.sdk_manager.get_shared_message_queue())
-                    self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2')
+                    pcap_file_name = single_apk_filename + '_' + datetime.datetime.now().isoformat().replace(':', '-') + '.pcap'
+                    tcpdump_cmd_params = ['-tcpdump', os.path.join(self.sdk_manager.get_home_dir(), 'MEM_DUMPS', 'tcpdumps', pcap_file_name)]
+                    self.sdk_manager.set_up_new_emulator('Nexus_5_API_22_2', tcpdump_cmd_params)
                     emu = self.sdk_manager.get_emulator_instance(0)
 
                     self.sdk_manager.set_up_new_adb()
@@ -78,12 +80,13 @@ class Recipe(object):
                     # self.sdk_manager.set_up_new_emulator_console('localhost', 5554)
                     # emu_console = self.sdk_manager.get_emulator_console_instance(0)
 
-                    self.go_ahead_flag = adb.check_if_emulator_has_booted()
                     self.logger.debug('Trying to boot up emulator... \n'
                                       'Current Time: {}'.format(time.asctime(time.localtime(time.time()))))
                     self.logger.debug('Trial number: {}'.format(trial_num))
+                    self.go_ahead_flag = adb.check_if_emulator_has_booted()
                     if self.go_ahead_flag:
                         self.emulator_booted_success = True
+                        self.logger.debug('Booted Successfully on Trial: {}'.format(trial_num))
                         break
                     time.sleep(5)
                     trial_num += 1
@@ -94,16 +97,9 @@ class Recipe(object):
             if self.go_ahead_flag:
                 # Configure AndroMemdump for first run
                 # (Given the system.img.qcow2 file preconfigured with Andromemdump-beta installed in System partition)
-                andromemdump_pkg_name = 'com.zwerks.andromemdumpbeta'
-                andromemdump_main_activity = 'com.zwerks.andromemdumpbeta.MainActivity'
-                andromemdump_pkg_activity = andromemdump_pkg_name + '/' + andromemdump_main_activity
-                andromemdump_cmd = ['shell', 'am', 'start', '-n', andromemdump_pkg_activity]
-                self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-                self.logger.debug("------ Running AndroMemdump - First RUN -------")
-                self.logger.debug("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-                self.go_ahead_flag = adb.run_adb_command('-e', andromemdump_cmd, 'Starting: Intent', 'None')
+                self.go_ahead_flag = adb.first_run_andromemdumpbeta()
                 #time.sleep(15)
-                time.sleep(15)
+                time.sleep(5)
 
                 # Andromemdump can be closed, or killed here,
                 # because the configuration is done while running the MainActivity [onCreate()]

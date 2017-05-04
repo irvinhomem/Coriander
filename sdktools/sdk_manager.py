@@ -26,6 +26,7 @@ class SdkManager(object):
         # self.shared_msg_queue = Queue()
 
         self.set_android_sdk_path()
+        self.home_dir = os.path.expanduser('~')
         # self.set_up_new_emulator('Nexus_5_API_22_2', self.shared_msg_queue)
         #
         # #Set up emulator console (Need to pick up hostname and port from MSG_QUEUE)
@@ -93,14 +94,14 @@ class SdkManager(object):
             self.logger.error('ADB instance Index{} NOT found'.format(index))
             exit()
 
-    def set_up_new_emulator(self, emu_name):
+    def set_up_new_emulator(self, emu_name, tcpdump_params):
     #def set_up_new_emulator(self, emu_name, msq_queue):
         #self.logger.debug('Queue Type: %s' % str(type(msq_queue)))
 
         # Create a new Emulator instance and add it to the SDK Manager's list of emulators
         instance_id = len(self.emulator_instances)
         #my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, msq_queue, instance_id)
-        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, instance_id)
+        my_Emulator = emulator_wrapper.EmulatorWrapper(self, emu_name, tcpdump_params, instance_id)
 
         #self.logger.debug("Queue Size: %i" % self.shared_msg_queue.qsize())
 
@@ -139,6 +140,9 @@ class SdkManager(object):
         # Create a new ADB Wrapper instance and append it to the SDK Manager's list of ADB Wrappers
         my_ADB = adb_wrapper.AdbWrapper(self)
         self.adb_instances.append(my_ADB)
+
+    def get_home_dir(self):
+        return self.home_dir
 
     # def check_msg_queue(self):
     #     #emulator_ready = "Serial number of this emulator"

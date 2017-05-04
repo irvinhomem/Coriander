@@ -11,7 +11,7 @@ from shutil import copyfile, copy2
 
 class EmulatorProc(threading.Thread):
 
-    def __init__(self, emu_loc, avd_name, msg_queue, instance_id):
+    def __init__(self, emu_loc, avd_name, tcp_dump_params, msg_queue, instance_id):
         # Configure Logging
         logging.basicConfig(level=logging.INFO)
         # logging.basicConfig(level=logging.WARNING)
@@ -25,6 +25,7 @@ class EmulatorProc(threading.Thread):
         self.emulator_loc = emu_loc
         self.msg_queue = msg_queue
         self.instance_id = instance_id
+        self.tcpdump_params = tcp_dump_params
 
         self.needs_wiping = True
 
@@ -42,9 +43,21 @@ class EmulatorProc(threading.Thread):
             #self.needs_wiping = False
         self.clean_out_avd_dir()
         self.inject_emu_system_img_from_temp()
-
+        #tcpdump_cmd = ''
+        #tcpdump_cmd = self.tcpdump_params
+        #tcpdump_cmd = []
+        #for params in self.tcpdump_params:
+            #tcpdump_cmd += params+' '
+            #tcpdump_cmd.append(params)
         #cmd = [self.emulator_loc, '-avd', emulator_name, '-wipe-data', '-debug', 'init'] # '-report-console' could be an interesting idea
         cmd = [self.emulator_loc, '-avd', emulator_name, '-netfast' ,'-debug', 'init']
+        # Particularly for doing "tcpdumps" because Qemu2 does not support -tcpdump yet,
+        # so we need to use the '-engine' directive to tell it to use Qemu1
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-engine', 'classic', '-netfast', '-debug-init']
+        #cmd = [self.emulator_loc, '-avd', emulator_name, '-engine', 'classic', '-netfast', '-debug', 'init']
+        for params in self.tcpdump_params:
+            cmd.append(params)
+        self.logger.debug('Emulator Command: {}'.format(cmd))
         # self.emu_process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
         self.emu_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                             universal_newlines=True, shell=True)

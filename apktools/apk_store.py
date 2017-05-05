@@ -161,7 +161,7 @@ class ApkStore(object):
             # Approx 3850 to 1000 Malicious samples (1011)
             # Approx 1490 to 1000 Benign samples (1009) [Eventually ran 2321 samples to get 1187 memdumps]
             # This value here [islice(reader, start_point, VALUE)] throttles the number of APK's to be downloaded
-            for row in islice(reader, 2321, 5490):
+            for row in islice(reader, 725, 5490):
                 if row[vt_detection_idx] == '':
                     # Skip because we don't know if the item was classified by VirusTotal as malicious or not (Do nothing)
                     self.logger.debug("Data Store doesn't have value for MALICIOUS OR BENIGN. Skipping ...")
@@ -183,6 +183,8 @@ class ApkStore(object):
         self.write_list_to_file(output_file_path, apk_file_data)
 
         return  apk_file_data
+
+    #def write_abs_start_position_in_dataset(self, filepath, ):
 
     def write_list_to_file(self, file_path, list_to_write):
         with open(file_path, "w", newline="") as out_file:

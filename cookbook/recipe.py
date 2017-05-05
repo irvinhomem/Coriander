@@ -59,8 +59,11 @@ class Recipe(object):
         # self.logger.debug('3rd Filename: {}'.format(filename_list[4])) #[2]
         # an_apk_file = self.apk_store.get_an_apk(filename_list[4])
 
+        loop_counter = 0
         for single_apk_filename in filename_list:
             self.emulator_booted_success = False
+            loop_counter += 1
+            self.write_current_loop_count(os.path.join('logs','curr_loop_count.txt'),loop_counter)
             if self.go_ahead_flag:
                 trial_num = 0
                 timeout = time.time() + 60 * 3
@@ -218,3 +221,7 @@ class Recipe(object):
         line_to_append = string_to_append + '::' + datetime.datetime.now().isoformat().replace(':','-') + '\n'
         with open(file_path, "a") as output_file:
             output_file.write(line_to_append)
+
+    def write_current_loop_count(self, file_path, loop_count):
+        with open(file_path, "w", newline="") as out_file:
+            out_file.write('Looped Before Crash: ' + str(loop_count))

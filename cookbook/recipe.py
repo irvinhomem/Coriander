@@ -41,8 +41,8 @@ class Recipe(object):
         success_log_file = os.path.join('logs', 'Success_' + datetime.datetime.now().isoformat().replace(':', '-') + '.log')
         # *************************
 
-        #apk_data_list = self.apk_store.get_all_apk_file_data_from_source('malicious')
-        apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
+        apk_data_list = self.apk_store.get_all_apk_file_data_from_source('malicious')
+        #apk_data_list = self.apk_store.get_all_apk_file_data_from_source('benign')
         #apk_name_list = self.apk_store.get_all_apk_filenames_from_source('benign')
 
         for apk_item in apk_data_list:

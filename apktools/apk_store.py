@@ -159,10 +159,10 @@ class ApkStore(object):
             self.logger.debug("Header Row: {}".format(self.row_zero_header))
             vt_detection_idx = self.row_zero_header.index('vt_detection')
             self.logger.debug("vt_detection INDEX: {}".format(vt_detection_idx))
-            # Approx 3850 to 1000 Malicious samples (1011)
+            # Approx 3850 to 1000 Malicious samples (1011) (Eventuall ran 7479 samples to get 1188 memdumps)
             # Approx 1490 to 1000 Benign samples (1009) [Eventually ran 2321 samples to get 1187 memdumps]
-            # This value here [islice(reader, start_point, VALUE)] throttles the number of APK's to be downloaded
-            for index, row in enumerate(islice(reader, 725, 5490)):
+            # This value here [islice(reader, start_zerpoint, VALUE)] throttles the number of APK's to be downloaded
+            for index, row in enumerate(islice(reader, 7479, 9490)):
                 if row[vt_detection_idx] == '':
                     # Skip because we don't know if the item was classified by VirusTotal as malicious or not (Do nothing)
                     self.logger.debug("Data Store doesn't have value for MALICIOUS OR BENIGN. Skipping ...")

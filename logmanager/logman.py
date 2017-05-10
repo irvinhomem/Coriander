@@ -2,6 +2,7 @@ import logging
 import os
 #from os import listdir
 #from os.path import isfile, join
+import errno
 
 class LogManager(object):
 
@@ -24,7 +25,10 @@ class LogManager(object):
 
         lines_seen = set()
         outfilepath = os.path.join(os.path.pardir, 'logs_unified', log_type+'.log')
+
         #if not os.path.exists(outfilepath):
+        self.check_if_path_exists(os.path.join(os.path.pardir, 'logs_unified'))
+
         self.logger.debug("Log File Out path: {}".format(outfilepath))
         unified_outfile = open(outfilepath, "w")
         for log_file in only_files:
@@ -44,9 +48,20 @@ class LogManager(object):
                             lines_seen.add(sha_256)
         #unified_outfile.close()
 
+    def check_if_path_exists(self, file_path):
+        if not os.path.exists(file_path):
+            self.logger.debug("Path does not exist: {}".format(file_path))
+            try:
+                self.logger.debug('Trying to CREATE PATH: {}'.format(file_path))
+                os.makedirs(file_path)
+            except OSError as err: # Guard against race condition
+                if err.errno != errno.EEXIST:
+                    self.logger.debug('FAILED to create path: {}'.format(file_path))
+                    raise
+
 
 
 myLogMan = LogManager()
 myLogMan.deduplicate_log_files('Success')
-myLogMan.deduplicate_log_files("FAILURE")
+myLogMan.deduplicate_log_files("FAILED")
 

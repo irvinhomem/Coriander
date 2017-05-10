@@ -19,7 +19,10 @@ class LogManager(object):
     def deduplicate_log_files(self, log_type):
         #dir_contents = os.listdir(os.path.join(os.path.pardir, "logs"))
         #self.logger.debug('Number of items in DIR: {}'.format(len(dir_contents)))
-        log_path = os.path.join(os.path.pardir, "logs")
+        #malicious_or_benign = 'Malicious'
+        #malicious_or_benign = 'Benign'
+        malicious_or_benign = ''
+        log_path = os.path.join(os.path.pardir, "logs", malicious_or_benign)
         only_files = [myFile for myFile in os.listdir(log_path) if os.path.isfile(os.path.join(log_path, myFile))]
         self.logger.debug('Number of files in DIR: {}'.format(len(only_files)))
 
